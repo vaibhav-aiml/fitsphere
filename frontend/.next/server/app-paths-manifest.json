@@ -1,0 +1,9 @@
+{
+  "/dashboard/page": "app/dashboard/page.js",
+  "/plans/page": "app/plans/page.js",
+  "/calendar/page": "app/calendar/page.js",
+  "/nutrition/page": "app/nutrition/page.js",
+  "/ai-coach/page": "app/ai-coach/page.js",
+  "/analytics/page": "app/analytics/page.js",
+  "/progress/page": "app/progress/page.js"
+}
