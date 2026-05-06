@@ -70,20 +70,19 @@ export default function Dashboard() {
 
   // Navigation items with icons and colors
   const navItems = [
-    { name: 'AI Coach', icon: '🤖', href: '/ai-coach', color: 'from-purple-500 to-pink-500' },
-    { name: 'Nutrition', icon: '🥗', href: '/nutrition', color: 'from-green-500 to-emerald-500' },
-    { name: 'Achievements', icon: '🏆', href: '/achievements', color: 'from-yellow-500 to-orange-500' },
-    { name: 'Music', icon: '🎵', href: '/music', color: 'from-pink-500 to-rose-500' },
-    { name: 'Export', icon: '📤', href: '/export', color: 'from-teal-500 to-cyan-500' },
-    { name: 'Calendar', icon: '📅', href: '/calendar', color: 'from-blue-500 to-indigo-500' },
-    { name: 'Workout', icon: '💪', href: '/workout', color: 'from-red-500 to-orange-500' },
-    { name: 'Exercises', icon: '🏋️', href: '/exercises', color: 'from-yellow-500 to-amber-500' },
-    { name: 'Plans', icon: '📋', href: '/plans', color: 'from-indigo-500 to-purple-500' },
-    { name: 'Progress', icon: '📊', href: '/progress', color: 'from-green-500 to-teal-500' },
-    { name: 'Analytics', icon: '📈', href: '/analytics', color: 'from-blue-500 to-cyan-500' },
-    { name: 'Social', icon: '👥', href: '/social', color: 'from-pink-500 to-purple-500' },
-  ];
-
+  { name: 'AI Coach', icon: '🧠', href: '/ai-coach', color: 'from-purple-500 to-pink-500' },
+  { name: 'Nutrition', icon: '🍎', href: '/nutrition', color: 'from-green-500 to-emerald-500' },
+  { name: 'Achievements', icon: '⭐', href: '/achievements', color: 'from-yellow-500 to-orange-500' },
+  { name: 'Music', icon: '🎧', href: '/music', color: 'from-pink-500 to-rose-500' },
+  { name: 'Export', icon: '📎', href: '/export', color: 'from-teal-500 to-cyan-500' },
+  { name: 'Calendar', icon: '📆', href: '/calendar', color: 'from-blue-500 to-indigo-500' },
+  { name: 'Workout', icon: '🏋️', href: '/workout', color: 'from-red-500 to-orange-500' },
+  { name: 'Exercises', icon: '📋', href: '/exercises', color: 'from-yellow-500 to-amber-500' },
+  { name: 'Plans', icon: '🎯', href: '/plans', color: 'from-indigo-500 to-purple-500' },
+  { name: 'Progress', icon: '📈', href: '/progress', color: 'from-green-500 to-teal-500' },
+  { name: 'Analytics', icon: '🔍', href: '/analytics', color: 'from-blue-500 to-cyan-500' },
+  { name: 'Social', icon: '🌐', href: '/social', color: 'from-pink-500 to-purple-500' },
+];
   // Quick stats cards
   const stats = [
     { label: 'Current Goal', value: user?.goal || 'Set Goal', icon: '🎯', color: 'from-blue-500 to-cyan-500' },
