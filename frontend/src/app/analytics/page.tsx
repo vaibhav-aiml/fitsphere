@@ -57,11 +57,12 @@ export default function AdvancedAnalytics() {
         })
       ]);
 
-      const uniqueExercises = [...new Set(workoutsRes.data.logs.map((log: any) => log.exerciseName))];
+      const uniqueExercises = Array.from(new Set((workoutsRes.data.logs || []).map((log: any) => log.exerciseName))) as string[];
       setExercises(uniqueExercises);
       if (uniqueExercises.length > 0) {
-        setSelectedExercise(uniqueExercises[0]);
-        await fetchOneRM(token, uniqueExercises[0]);
+        const firstEx = uniqueExercises[0] as string;
+        setSelectedExercise(firstEx);
+        await fetchOneRM(token, firstEx);
       }
 
       setAnalytics({

@@ -1,6 +1,11 @@
-'use client';
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: any;
+  }
+}
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -48,11 +53,11 @@ export default function MusicIntegration() {
   ];
 
   // Load YouTube API
-  useState(() => {
+  useEffect(() => {
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
   }, []);
 
   const playWorkoutMusic = (bpm: number, track?: Track) => {
@@ -97,7 +102,7 @@ export default function MusicIntegration() {
     } else {
       // Fallback: open in new tab
       window.open(`https://www.youtube.com/watch?v=${selectedTrack.youtubeId}`, '_blank');
-      toast.info(`Opening ${selectedTrack.name} in YouTube`);
+      toast(`Opening ${selectedTrack.name} in YouTube`, { icon: '🎵' });
     }
     
     setCurrentTrack(selectedTrack);

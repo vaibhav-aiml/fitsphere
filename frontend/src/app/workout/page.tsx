@@ -33,7 +33,7 @@ export default function WorkoutLogger() {
       const response = await axios.get('http://localhost:5000/api/workout-logs', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const uniqueExercises = [...new Set(response.data.logs.map((log: any) => log.exerciseName))];
+      const uniqueExercises = Array.from(new Set((response.data.logs || []).map((log: any) => log.exerciseName))) as string[];
       setExercises(uniqueExercises);
     } catch (error) {
       console.error('Failed to fetch history:', error);

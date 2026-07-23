@@ -24,7 +24,8 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/login`, {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+          const response = await axios.post(`${apiBase}/login`, {
             email: credentials?.email,
             password: credentials?.password
           });
@@ -45,24 +46,20 @@ const handler = NextAuth({
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("SignIn callback - provider:", account?.provider);
-      
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          console.log("Sending to backend:", { name: user.name, email: user.email });
-          
-          const response = await axios.post(`http://localhost:5000/api/auth/google`, {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+          const response = await axios.post(`${apiBase}/auth/google`, {
+            idToken: account.id_token,
             name: user.name,
             email: user.email,
             image: user.image
           });
           
-          console.log("Backend response:", response.data);
-          
           if (response.data.success) {
-            user.backendToken = response.data.token;
-            user.backendUser = response.data.user;
+            (user as any).backendToken = response.data.token;
+            (user as any).backendUser = response.data.user;
             return true;
           }
           return false;
@@ -84,9 +81,11 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.backendToken = token.backendToken as string;
-      session.user.backendUser = token.backendUser as any;
+      if (session.user) {
+        (session.user as any).id = token.id as string;
+        (session.user as any).backendToken = token.backendToken as string;
+        (session.user as any).backendUser = token.backendUser as any;
+      }
       return session;
     }
   },
@@ -95,8 +94,7 @@ const handler = NextAuth({
     error: "/auth/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
-  useSecureCookies: false, // Important for localhost
+  debug: process.env.NODE_ENV === 'development',
 });
 
 export { handler as GET, handler as POST };

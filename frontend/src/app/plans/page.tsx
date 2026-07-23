@@ -198,7 +198,7 @@ export default function WorkoutPlans() {
                 <p className="text-gray-400 mt-1">{selectedPlan.description}</p>
               </div>
               <button
-                onClick={() => toast.info('PDF download coming soon!')}
+                onClick={() => toast('PDF download coming soon!', { icon: '📄' })}
                 className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
               >
                 📄 Download Week {selectedWeek} as PDF

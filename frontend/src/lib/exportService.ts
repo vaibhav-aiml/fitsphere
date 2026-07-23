@@ -1,6 +1,6 @@
-﻿import { saveAs } from '"'"'file-saver'"'"';
-import { jsPDF } from '"'"'jspdf'"'"';
-import html2canvas from '"'"'html2canvas'"'"';
+import { saveAs } from 'file-saver';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export interface WorkoutData {
   date: string;
@@ -22,23 +22,23 @@ export interface UserStats {
 }
 
 export const exportToCSV = (data: WorkoutData[], filename: string) => {
-  const headers = ['"'"'Date'"'"', '"'"'Exercise'"'"', '"'"'Weight (kg)'"'"', '"'"'Reps'"'"', '"'"'Sets'"'"', '"'"'Volume (kg)'"'"', '"'"'1RM (kg)'"'"'];
-  const csvRows = [headers.join('"'"','"'"')];
+  const headers = ['Date', 'Exercise', 'Weight (kg)', 'Reps', 'Sets', 'Volume (kg)', '1RM (kg)'];
+  const csvRows = [headers.join(',')];
   
   for (const row of data) {
     const values = [
       row.date,
-      `"'"'${row.exerciseName}"'"'`,
+      `"${row.exerciseName}"`,
       row.weight,
       row.reps,
       row.sets,
       row.volume,
       row.oneRM
     ];
-    csvRows.push(values.join('"'"','"'"'));
+    csvRows.push(values.join(','));
   }
   
-  const blob = new Blob([csvRows.join('"'"'\n'"'"')], { type: '"'"'text/csv;charset=utf-8;'"'"' });
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   saveAs(blob, `${filename}.csv`);
 };
 
@@ -46,13 +46,13 @@ export const exportToPDF = async (elementId: string, filename: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
   
-  const canvas = await html2canvas(element, { scale: 2, backgroundColor: '"'"'#ffffff'"'"' });
-  const imgData = canvas.toDataURL('"'"'image/png'"'"');
-  const pdf = new jsPDF({ orientation: '"'"'portrait'"'"', unit: '"'"'mm'"'"', format: '"'"'a4'"'"' });
+  const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   
   const imgWidth = 210;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  pdf.addImage(imgData, '"'"'PNG'"'"', 0, 0, imgWidth, imgHeight);
+  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   pdf.save(`${filename}.pdf`);
 };
 
@@ -60,23 +60,23 @@ export const shareAsImage = async (elementId: string, title: string) => {
   const element = document.getElementById(elementId);
   if (!element) return;
   
-  const canvas = await html2canvas(element, { scale: 2, backgroundColor: '"'"'#1f2937'"'"' });
+  const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#1f2937' });
   
   canvas.toBlob(async (blob) => {
     if (!blob) return;
-    const file = new File([blob], `${title}.png`, { type: '"'"'image/png'"'"' });
+    const file = new File([blob], `${title}.png`, { type: 'image/png' });
     
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ title, text: '"'"'Check my workout progress! 💪'"'"', files: [file] });
+      await navigator.share({ title, text: 'Check my workout progress! 💪', files: [file] });
     } else {
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('"'"'a'"'"');
+      const a = document.createElement('a');
       a.href = url;
       a.download = `${title}.png`;
       a.click();
       URL.revokeObjectURL(url);
     }
-  }, '"'"'image/png'"'"');
+  }, 'image/png');
 };
 
 export const generateProgressReport = (workouts: WorkoutData[], stats: UserStats) => {

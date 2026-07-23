@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Message {
@@ -49,26 +50,24 @@ export default function AICoach() {
   };
 
   const fetchExercises = async (token: string) => {
-  try {
-    const response = await axios.get('http://localhost:5000/api/workout-logs?limit=100', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const uniqueExercises = [...new Set(response.data.logs.map((log: any) => log.exerciseName))];
-    setExercises(uniqueExercises);
-    
-    if (uniqueExercises.length === 0) {
-      toast.custom((t) => (
-        <div className="bg-yellow-600 text-white p-3 rounded-lg">
-          No exercises found! Log some workouts first to enable AI features. 💪
-        </div>
-      ));
-    } else {
-      setSelectedExercise(uniqueExercises[0]);
+    try {
+      const response = await api.get('/workout-logs?limit=100');
+      const uniqueExercises = Array.from(new Set((response.data.logs || []).map((log: any) => log.exerciseName))) as string[];
+      setExercises(uniqueExercises);
+      
+      if (uniqueExercises.length === 0) {
+        toast.custom((t) => (
+          <div className="bg-yellow-600 text-white p-3 rounded-lg">
+            No exercises found! Log some workouts first to enable AI features. 💪
+          </div>
+        ));
+      } else {
+        setSelectedExercise(uniqueExercises[0] || '');
+      }
+    } catch (error) {
+      console.error('Failed to fetch exercises:', error);
     }
-  } catch (error) {
-    console.error('Failed to fetch exercises:', error);
-  }
-};
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
