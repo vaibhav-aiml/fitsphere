@@ -19,30 +19,34 @@ interface WorkoutData {
   oneRM: number;
 }
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function ExportPage() {
   const router = useRouter();
   const [workouts, setWorkouts] = useState<WorkoutData[]>([]);
   const [userName, setUserName] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const shareRef = useRef<HTMLDivElement>(null);
+
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
+    if (token) {
+      fetchData();
     }
-    fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const [workoutsRes, profileRes] = await Promise.all([
         api.get('/workout-logs?limit=500'),
         api.get('/profile')
       ]);
 
-      const workoutData: WorkoutData[] = workoutsRes.data.logs.map((log: any) => ({
+      const workoutData: WorkoutData[] = (workoutsRes.data.logs || []).map((log: any) => ({
         date: new Date(log.date).toLocaleDateString(),
         exerciseName: log.exerciseName,
         weight: log.weight,
@@ -53,10 +57,9 @@ export default function ExportPage() {
       }));
 
       setWorkouts(workoutData);
-      setUserName(profileRes.data.user.name);
+      setUserName(profileRes.data.user?.name || 'Athlete');
     } catch (error) {
-      console.error('Failed to fetch data:', error);
-      toast.error('Failed to load data');
+      console.error('Failed to fetch export data:', error);
     } finally {
       setLoading(false);
     }
@@ -216,6 +219,13 @@ export default function ExportPage() {
           </div>
         </div>
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

@@ -27,6 +27,9 @@ interface Meal {
   date: string;
 }
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function NutritionTracker() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('meals');
@@ -43,16 +46,16 @@ export default function NutritionTracker() {
   const [newGroceryItem, setNewGroceryItem] = useState('');
   const [newSupplement, setNewSupplement] = useState({ name: '', dosage: '', timeOfDay: 'morning', time: '09:00' });
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.replace('/auth/login');
-      return;
+    if (token) {
+      fetchData();
+      fetchGroceryList();
+      fetchSupplements();
     }
-    fetchData();
     fetchFoods();
-    fetchGroceryList();
-    fetchSupplements();
   }, [selectedDate]);
 
   const fetchData = async () => {
@@ -98,38 +101,56 @@ export default function NutritionTracker() {
   };
 
   const addWater = async () => {
-    try {
-      const response = await api.post('/water', { amount: 250 });
-      setWaterIntake(response.data.todayTotal);
-      toast.success('Added 250ml water! 💧');
-      fetchData();
-    } catch (error) {
-      toast.error('Failed to add water');
-    }
+    requireAuth(async () => {
+      try {
+        const response = await api.post('/water', { amount: 250 });
+        setWaterIntake(response.data.todayTotal);
+        toast.success('Added 250ml water! 💧');
+        fetchData();
+      } catch (error) {
+        toast.error('Failed to add water');
+      }
+    }, {
+      title: 'Water Tracking Requires Account',
+      description: 'Sign in to record your daily hydration goals.',
+      nextUrl: '/nutrition'
+    });
   };
 
   const addToGrocery = async () => {
     if (!newGroceryItem.trim()) return;
-    try {
-      await api.post('/grocery-list', { items: [{ name: newGroceryItem, quantity: '1', category: 'other' }] });
-      setNewGroceryItem('');
-      fetchGroceryList();
-      toast.success('Added to grocery list!');
-    } catch (error) {
-      toast.error('Failed to add item');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post('/grocery-list', { items: [{ name: newGroceryItem, quantity: '1', category: 'other' }] });
+        setNewGroceryItem('');
+        fetchGroceryList();
+        toast.success('Added to grocery list!');
+      } catch (error) {
+        toast.error('Failed to add item');
+      }
+    }, {
+      title: 'Grocery List Requires Account',
+      description: 'Sign in to save items to your grocery list.',
+      nextUrl: '/nutrition'
+    });
   };
 
   const addSupplement = async () => {
-    try {
-      await api.post('/supplements', newSupplement);
-      setShowAddSupplement(false);
-      setNewSupplement({ name: '', dosage: '', timeOfDay: 'morning', time: '09:00' });
-      fetchSupplements();
-      toast.success('Supplement reminder added!');
-    } catch (error) {
-      toast.error('Failed to add supplement');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post('/supplements', newSupplement);
+        setShowAddSupplement(false);
+        setNewSupplement({ name: '', dosage: '', timeOfDay: 'morning', time: '09:00' });
+        fetchSupplements();
+        toast.success('Supplement reminder added!');
+      } catch (error) {
+        toast.error('Failed to add supplement');
+      }
+    }, {
+      title: 'Supplement Reminders Require Account',
+      description: 'Sign in to save your supplement reminders.',
+      nextUrl: '/nutrition'
+    });
   };
 
   const targetCalories = 2500;
@@ -302,6 +323,13 @@ export default function NutritionTracker() {
             </div>
           </div>
         )}
+        <AuthModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          title={authConfig.title}
+          description={authConfig.description}
+          nextUrl={authConfig.nextUrl}
+        />
       </div>
     </div>
   );

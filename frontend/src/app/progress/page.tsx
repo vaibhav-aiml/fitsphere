@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
 
 export default function ProgressPage() {
   const router = useRouter();
@@ -20,13 +23,13 @@ export default function ProgressPage() {
   });
   const [bodyWeightForm, setBodyWeightForm] = useState({ weight: '' });
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.replace('/auth/login');
-      return;
+    if (token) {
+      fetchData();
     }
-    fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -38,36 +41,48 @@ export default function ProgressPage() {
       ]);
       
       setStats(statsRes.data.stats);
-      setWorkoutLogs(logsRes.data.logs);
-      setBodyWeights(weightRes.data.weights);
+      setWorkoutLogs(logsRes.data.logs || []);
+      setBodyWeights(weightRes.data.weights || []);
     } catch (error) {
-      toast.error('Failed to load progress data');
+      console.error('Failed to load progress data:', error);
     }
   };
 
   const handleLogWorkout = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await api.post('/workout-logs', logForm);
-      toast.success('Workout logged successfully!');
-      setShowLogForm(false);
-      setLogForm({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
-      fetchData();
-    } catch (error) {
-      toast.error('Failed to log workout');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post('/workout-logs', logForm);
+        toast.success('Workout logged successfully!');
+        setShowLogForm(false);
+        setLogForm({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
+        fetchData();
+      } catch (error) {
+        toast.error('Failed to log workout');
+      }
+    }, {
+      title: 'Progress Logging Requires Account',
+      description: 'Sign in to record your workout logs and track progress.',
+      nextUrl: '/progress'
+    });
   };
 
   const handleLogBodyWeight = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await api.post('/body-weight', bodyWeightForm);
-      toast.success('Body weight logged!');
-      setBodyWeightForm({ weight: '' });
-      fetchData();
-    } catch (error) {
-      toast.error('Failed to log body weight');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post('/body-weight', bodyWeightForm);
+        toast.success('Body weight logged!');
+        setBodyWeightForm({ weight: '' });
+        fetchData();
+      } catch (error) {
+        toast.error('Failed to log body weight');
+      }
+    }, {
+      title: 'Weight Tracking Requires Account',
+      description: 'Sign in to log body weight and track trend graphs.',
+      nextUrl: '/progress'
+    });
   };
 
   return (
@@ -230,6 +245,13 @@ export default function ProgressPage() {
           </div>
         )}
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

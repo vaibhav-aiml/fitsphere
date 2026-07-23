@@ -52,6 +52,9 @@ interface WorkoutPlan {
   };
 }
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function AdvancedPlans() {
   const router = useRouter();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
@@ -60,31 +63,37 @@ export default function AdvancedPlans() {
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [planType, setPlanType] = useState<string>('powerlifting');
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.replace('/auth/login');
-      return;
-    }
     fetchPlans();
   }, []);
 
   const fetchPlans = async () => {
     try {
       const response = await api.get('/advanced-plans');
-      setPlans(response.data.plans);
+      setPlans(response.data.plans || []);
       
-      const powerliftingPlan = response.data.plans.find((p: WorkoutPlan) => p.type === 'powerlifting');
+      const powerliftingPlan = (response.data.plans || []).find((p: WorkoutPlan) => p.type === 'powerlifting');
       if (powerliftingPlan) {
         setSelectedPlan(powerliftingPlan);
         setPlanType('powerlifting');
       }
     } catch (error) {
       console.error('Failed to fetch plans:', error);
-      toast.error('Failed to load workout plans');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEnrollClick = (planName: string) => {
+    requireAuth(() => {
+      toast.success(`Enrolled in ${planName}! 🎉`);
+    }, {
+      title: 'Enrollment Requires Account',
+      description: 'Create an account to save progress and track weekly workouts.',
+      nextUrl: '/plans'
+    });
   };
 
   const getPlanByType = (type: string) => {
@@ -388,6 +397,13 @@ export default function AdvancedPlans() {
             </div>
           </div>
         )}
+        <AuthModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          title={authConfig.title}
+          description={authConfig.description}
+          nextUrl={authConfig.nextUrl}
+        />
       </div>
     </div>
   );

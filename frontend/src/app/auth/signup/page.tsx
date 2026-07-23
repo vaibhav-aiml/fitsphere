@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
-export default function Signup() {
+function SignupFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get('next') || '/';
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -26,13 +30,9 @@ export default function Signup() {
       
       if (response.data.success) {
         toast.success('Account created successfully!');
-        // Store token in localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        // Redirect to dashboard
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1500);
+        router.push(nextUrl);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Registration failed');
@@ -59,7 +59,7 @@ export default function Signup() {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-gray-300 mb-2 text-sm font-medium">Email</label>
             <input
@@ -71,7 +71,7 @@ export default function Signup() {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-gray-300 mb-2 text-sm font-medium">Password</label>
             <input
@@ -83,49 +83,47 @@ export default function Signup() {
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Fitness Goal</label>
+            <label className="block text-gray-300 mb-2 text-sm font-medium">Primary Goal</label>
             <select
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
               value={formData.goal}
               onChange={(e) => setFormData({...formData, goal: e.target.value})}
             >
-              <option value="bodybuilding">💪 Bodybuilding (Build Muscle)</option>
-              <option value="powerlifting">🏋️ Powerlifting (Max Strength)</option>
-              <option value="fatloss">🔥 Fat Loss (Get Lean)</option>
+              <option value="bodybuilding">Bodybuilding</option>
+              <option value="powerlifting">Powerlifting</option>
+              <option value="weight-loss">Weight Loss</option>
+              <option value="general-fitness">General Fitness</option>
             </select>
           </div>
-          
-          <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Experience Level</label>
-            <select
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
-              value={formData.experience}
-              onChange={(e) => setFormData({...formData, experience: e.target.value})}
-            >
-              <option value="beginner">🌱 Beginner (Less than 6 months)</option>
-              <option value="intermediate">📈 Intermediate (6 months - 2 years)</option>
-              <option value="advanced">🚀 Advanced (2+ years)</option>
-            </select>
-          </div>
-          
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <p className="text-gray-400 text-center mt-6 text-sm">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-blue-500 hover:text-blue-400 font-medium">
-            Login
+          <Link href={`/auth/login?next=${encodeURIComponent(nextUrl)}`} className="text-blue-500 hover:text-blue-400 font-medium">
+            Sign In
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function Signup() {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">Loading...</div>}>
+        <SignupFormContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

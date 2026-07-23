@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
 
 interface Message {
   id: string;
@@ -19,7 +20,7 @@ export default function AICoach() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "👋 Hello! I'm your AI Coach. I can help you with workout advice, form tips, weight recommendations, and breaking through plateaus. What would you like to know?",
+      text: "👋 Hi! I'm your FitSphere AI Coach. Ask me anything about workout programming, progressive overload, recovery, or form tips!",
       isUser: false,
       timestamp: new Date()
     }
@@ -32,13 +33,13 @@ export default function AICoach() {
   const [showPlateauAnalysis, setShowPlateauAnalysis] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
+    if (token) {
+      fetchExercises();
     }
-    fetchExercises(token);
   }, []);
 
   useEffect(() => {
@@ -49,19 +50,12 @@ export default function AICoach() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fetchExercises = async (token: string) => {
+  const fetchExercises = async () => {
     try {
       const response = await api.get('/workout-logs?limit=100');
       const uniqueExercises = Array.from(new Set((response.data.logs || []).map((log: any) => log.exerciseName))) as string[];
       setExercises(uniqueExercises);
-      
-      if (uniqueExercises.length === 0) {
-        toast.custom((t) => (
-          <div className="bg-yellow-600 text-white p-3 rounded-lg">
-            No exercises found! Log some workouts first to enable AI features. 💪
-          </div>
-        ));
-      } else {
+      if (uniqueExercises.length > 0) {
         setSelectedExercise(uniqueExercises[0] || '');
       }
     } catch (error) {
@@ -72,31 +66,37 @@ export default function AICoach() {
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: input,
-      isUser: true,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
-
-    try {
-      const response = await api.post('/ai/advice', { question: input });
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response.data.response,
-        isUser: false,
+    requireAuth(async () => {
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        text: input,
+        isUser: true,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      toast.error('Failed to get AI response');
-    } finally {
-      setLoading(false);
-    }
+      setMessages(prev => [...prev, userMessage]);
+      setInput('');
+      setLoading(true);
+
+      try {
+        const response = await api.post('/ai/advice', { question: input });
+
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: response.data.response,
+          isUser: false,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } catch (error) {
+        toast.error('Failed to get AI response');
+      } finally {
+        setLoading(false);
+      }
+    }, {
+      title: 'AI Coaching Requires Account',
+      description: 'Sign in or create an account to chat with the AI Coach and get personalized recommendations.',
+      nextUrl: '/ai-coach'
+    });
   };
 
   const handleFormFeedback = async () => {
@@ -336,6 +336,13 @@ export default function AICoach() {
           </div>
         </div>
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

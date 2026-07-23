@@ -23,31 +23,43 @@ import {
   Cell
 } from 'recharts';
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function AdvancedAnalytics() {
   const router = useRouter();
-  const [exercises, setExercises] = useState<string[]>([]);
-  const [selectedExercise, setSelectedExercise] = useState('');
-  const [oneRMProgression, setOneRMProgression] = useState<any[]>([]);
+  const [exercises, setExercises] = useState<string[]>(['Bench Press', 'Squat', 'Deadlift']);
+  const [selectedExercise, setSelectedExercise] = useState('Bench Press');
+  const [oneRMProgression, setOneRMProgression] = useState<any[]>([
+    { date: '2026-01-01', oneRM: 80 },
+    { date: '2026-02-01', oneRM: 90 },
+    { date: '2026-03-01', oneRM: 100 }
+  ]);
   const [analytics, setAnalytics] = useState<any>({
-    volumeData: [],
-    totalVolume: 0,
-    totalWorkouts: 0,
+    volumeData: [
+      { date: 'Mon', volume: 2400 },
+      { date: 'Wed', volume: 3100 },
+      { date: 'Fri', volume: 2900 }
+    ],
+    totalVolume: 8400,
+    totalWorkouts: 12,
     caloriesData: [],
     summary: {}
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
+    if (token) {
+      fetchAnalytics();
     }
-    fetchAnalytics();
   }, []);
 
   const fetchAnalytics = async () => {
     try {
+      setLoading(true);
       const [volumeRes, summaryRes, caloriesRes, workoutsRes] = await Promise.all([
         api.get('/analytics/volume'),
         api.get('/analytics/summary'),
@@ -56,8 +68,8 @@ export default function AdvancedAnalytics() {
       ]);
 
       const uniqueExercises = Array.from(new Set((workoutsRes.data.logs || []).map((log: any) => log.exerciseName))) as string[];
-      setExercises(uniqueExercises);
       if (uniqueExercises.length > 0) {
+        setExercises(uniqueExercises);
         const firstEx = uniqueExercises[0] as string;
         setSelectedExercise(firstEx);
         await fetchOneRM('', firstEx);
@@ -65,14 +77,13 @@ export default function AdvancedAnalytics() {
 
       setAnalytics({
         volumeData: volumeRes.data.volumeData || [],
-        totalVolume: volumeRes.data.totalVolume || 0,
-        totalWorkouts: volumeRes.data.totalWorkouts || 0,
+        totalVolume: summaryRes.data.totalVolume || 0,
+        totalWorkouts: summaryRes.data.totalWorkouts || 0,
         caloriesData: caloriesRes.data.caloriesData || [],
-        summary: summaryRes.data.summary || {}
+        summary: summaryRes.data || {}
       });
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
-      toast.error('Failed to load analytics data');
     } finally {
       setLoading(false);
     }
@@ -296,6 +307,13 @@ export default function AdvancedAnalytics() {
           </ul>
         </div>
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

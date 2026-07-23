@@ -26,25 +26,34 @@ interface UserLevel {
   xpProgress: number;
 }
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function Achievements() {
   const router = useRouter();
-  const [userLevel, setUserLevel] = useState<UserLevel | null>(null);
+  const [userLevel, setUserLevel] = useState<UserLevel | null>({
+    currentLevel: 1,
+    levelName: 'Bronze Lifter',
+    currentXP: 150,
+    nextLevelXP: 500
+  } as any);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [challengeProgress, setChallengeProgress] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.replace('/auth/login');
-      return;
+    if (token) {
+      fetchData();
     }
-    fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const [levelRes, badgesRes, challengeRes] = await Promise.all([
         api.get('/user-level'),
         api.get('/user-badges'),
@@ -198,6 +207,13 @@ export default function Achievements() {
           </div>
         )}
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

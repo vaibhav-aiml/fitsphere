@@ -27,6 +27,9 @@ interface Post {
   privacy: string;
 }
 
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
+
 export default function SocialFeed() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -37,15 +40,12 @@ export default function SocialFeed() {
   const [recentWorkout, setRecentWorkout] = useState<any>(null);
   const [userName, setUserName] = useState('');
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    if (!token) {
-      router.replace('/auth/login');
-      return;
-    }
     
-    // Get user name from localStorage
     if (userData) {
       try {
         const user = JSON.parse(userData);
@@ -55,8 +55,12 @@ export default function SocialFeed() {
       }
     }
     
-    fetchFeed();
-    fetchRecentWorkout();
+    if (token) {
+      fetchFeed();
+      fetchRecentWorkout();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const fetchFeed = async () => {
@@ -88,29 +92,41 @@ export default function SocialFeed() {
       return;
     }
 
-    try {
-      const response = await api.post('/posts', { content: newPost, privacy: postPrivacy });
-      
-      if (response.data.success) {
-        setPosts([response.data.post, ...posts]);
-        setNewPost('');
-        toast.success('Post created! 🎉');
-        fetchFeed(); // Refresh feed
+    requireAuth(async () => {
+      try {
+        const response = await api.post('/posts', { content: newPost, privacy: postPrivacy });
+        
+        if (response.data.success) {
+          setPosts([response.data.post, ...posts]);
+          setNewPost('');
+          toast.success('Post created! 🎉');
+          fetchFeed();
+        }
+      } catch (error) {
+        console.error('Failed to create post:', error);
+        toast.error('Failed to create post');
       }
-    } catch (error) {
-      console.error('Failed to create post:', error);
-      toast.error('Failed to create post');
-    }
+    }, {
+      title: 'Community Feed Requires Account',
+      description: 'Sign in or create an account to share posts & connect with athletes.',
+      nextUrl: '/social'
+    });
   };
 
   const handleLike = async (postId: string) => {
-    try {
-      await api.post(`/posts/${postId}/like`, {});
-      fetchFeed(); // Refresh to show updated likes
-      toast.success('Liked! ❤️');
-    } catch (error) {
-      toast.error('Failed to like post');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post(`/posts/${postId}/like`, {});
+        fetchFeed();
+        toast.success('Liked! ❤️');
+      } catch (error) {
+        toast.error('Failed to like post');
+      }
+    }, {
+      title: 'Community Feed Requires Account',
+      description: 'Sign in to like posts and support fellow lifters.',
+      nextUrl: '/social'
+    });
   };
 
   const handleShareWorkout = async () => {
@@ -119,22 +135,24 @@ export default function SocialFeed() {
       return;
     }
 
-    try {
-      const response = await api.post('/share-workout', { workoutId: recentWorkout._id });
-      
-      if (response.data.success) {
-        toast.success('Workout shared! 🎉');
-        fetchFeed();
-        setShowShareModal(false);
+    requireAuth(async () => {
+      try {
+        const response = await api.post('/share-workout', { workoutId: recentWorkout._id });
         
-        // Copy to clipboard
-        navigator.clipboard.writeText(response.data.shareText);
-        toast.success('Share text copied to clipboard!');
+        if (response.data.success) {
+          toast.success('Workout shared! 🎉');
+          fetchFeed();
+          setShowShareModal(false);
+          navigator.clipboard.writeText(response.data.shareText);
+        }
+      } catch (error) {
+        toast.error('Failed to share workout');
       }
-    } catch (error) {
-      console.error('Failed to share workout:', error);
-      toast.error('Failed to share workout');
-    }
+    }, {
+      title: 'Workout Sharing Requires Account',
+      description: 'Sign in to share your workout logs with the community.',
+      nextUrl: '/social'
+    });
   };
 
   const formatDate = (date: string) => {
@@ -317,6 +335,13 @@ export default function SocialFeed() {
           )}
         </div>
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }

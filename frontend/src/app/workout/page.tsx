@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
 
 export default function WorkoutLogger() {
   const router = useRouter();
@@ -19,13 +21,13 @@ export default function WorkoutLogger() {
     notes: ''
   });
 
+  const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
+    if (token) {
+      fetchWorkoutHistory();
     }
-    fetchWorkoutHistory();
   }, []);
 
   const fetchWorkoutHistory = async () => {
@@ -57,18 +59,24 @@ export default function WorkoutLogger() {
       return;
     }
 
-    try {
-      await api.post('/workout-logs', formData);
-      
-      setCurrentWorkout([...currentWorkout, { ...formData, id: Date.now() }]);
-      toast.success(`${formData.exerciseName} added to workout!`);
-      
-      setFormData({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
-      setShowAddExercise(false);
-      setOneRepMax(null);
-    } catch (error) {
-      toast.error('Failed to add exercise');
-    }
+    requireAuth(async () => {
+      try {
+        await api.post('/workout-logs', formData);
+        
+        setCurrentWorkout([...currentWorkout, { ...formData, id: Date.now() }]);
+        toast.success(`${formData.exerciseName} added to workout!`);
+        
+        setFormData({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
+        setShowAddExercise(false);
+        setOneRepMax(null);
+      } catch (error) {
+        toast.error('Failed to add exercise');
+      }
+    }, {
+      title: 'Workout Logging Requires Account',
+      description: 'Sign in to record your sets, reps, and weights in your personal history.',
+      nextUrl: '/workout'
+    });
   };
 
   const handleFinishWorkout = () => {
@@ -308,6 +316,13 @@ export default function WorkoutLogger() {
           </ul>
         </div>
       </div>
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }
