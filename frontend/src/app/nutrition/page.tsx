@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Food {
@@ -31,94 +31,78 @@ export default function NutritionTracker() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('meals');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [meals, setMeals] = useState<any[]>([]);
   const [totals, setTotals] = useState({ calories: 0, protein: 0, carbs: 0, fats: 0 });
   const [waterIntake, setWaterIntake] = useState(0);
-  const [waterLogs, setWaterLogs] = useState([]);
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [showAddMeal, setShowAddMeal] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState('breakfast');
-  const [selectedFoods, setSelectedFoods] = useState<any[]>([]);
+  const [waterLogs, setWaterLogs] = useState<any[]>([]);
+  const [foods, setFoods] = useState<any[]>([]);
   const [groceryItems, setGroceryItems] = useState<any[]>([]);
-  const [newGroceryItem, setNewGroceryItem] = useState('');
   const [supplements, setSupplements] = useState<any[]>([]);
+  const [showAddMeal, setShowAddMeal] = useState(false);
   const [showAddSupplement, setShowAddSupplement] = useState(false);
+  const [newGroceryItem, setNewGroceryItem] = useState('');
   const [newSupplement, setNewSupplement] = useState({ name: '', dosage: '', timeOfDay: 'morning', time: '09:00' });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
-    fetchData(token);
-    fetchFoods(token);
-    fetchGroceryList(token);
-    fetchSupplements(token);
+    fetchData();
+    fetchFoods();
+    fetchGroceryList();
+    fetchSupplements();
   }, [selectedDate]);
 
-  const fetchData = async (token: string) => {
+  const fetchData = async () => {
     try {
       const [mealsRes, waterRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/meals?date=${selectedDate}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`http://localhost:5000/api/water?date=${selectedDate}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get(`/meals?date=${selectedDate}`),
+        api.get(`/water?date=${selectedDate}`)
       ]);
-      setMeals(mealsRes.data.meals);
-      setTotals(mealsRes.data.totals);
-      setWaterIntake(waterRes.data.total);
-      setWaterLogs(waterRes.data.logs);
+      setMeals(mealsRes.data.meals || []);
+      setTotals(mealsRes.data.totals || { calories: 0, protein: 0, carbs: 0, fats: 0 });
+      setWaterIntake(waterRes.data.total || 0);
+      setWaterLogs(waterRes.data.logs || []);
     } catch (error) {
       console.error('Failed to fetch nutrition data:', error);
     }
   };
 
-  const fetchFoods = async (token: string) => {
+  const fetchFoods = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/foods', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setFoods(response.data.foods);
+      const response = await api.get('/foods');
+      setFoods(response.data.foods || []);
     } catch (error) {
       console.error('Failed to fetch foods:', error);
     }
   };
 
-  const fetchGroceryList = async (token: string) => {
+  const fetchGroceryList = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/grocery-list', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/grocery-list');
       setGroceryItems(response.data.list?.items || []);
     } catch (error) {
       console.error('Failed to fetch grocery list:', error);
     }
   };
 
-  const fetchSupplements = async (token: string) => {
+  const fetchSupplements = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/supplements', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSupplements(response.data.supplements);
+      const response = await api.get('/supplements');
+      setSupplements(response.data.supplements || []);
     } catch (error) {
       console.error('Failed to fetch supplements:', error);
     }
   };
 
   const addWater = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:5000/api/water', 
-        { amount: 250 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post('/water', { amount: 250 });
       setWaterIntake(response.data.todayTotal);
       toast.success('Added 250ml water! 💧');
-      fetchData(token);
+      fetchData();
     } catch (error) {
       toast.error('Failed to add water');
     }
@@ -126,14 +110,10 @@ export default function NutritionTracker() {
 
   const addToGrocery = async () => {
     if (!newGroceryItem.trim()) return;
-    const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/grocery-list',
-        { items: [{ name: newGroceryItem, quantity: '1', category: 'other' }] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post('/grocery-list', { items: [{ name: newGroceryItem, quantity: '1', category: 'other' }] });
       setNewGroceryItem('');
-      fetchGroceryList(token);
+      fetchGroceryList();
       toast.success('Added to grocery list!');
     } catch (error) {
       toast.error('Failed to add item');
@@ -141,15 +121,11 @@ export default function NutritionTracker() {
   };
 
   const addSupplement = async () => {
-    const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/supplements',
-        newSupplement,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post('/supplements', newSupplement);
       setShowAddSupplement(false);
       setNewSupplement({ name: '', dosage: '', timeOfDay: 'morning', time: '09:00' });
-      fetchSupplements(token);
+      fetchSupplements();
       toast.success('Supplement reminder added!');
     } catch (error) {
       toast.error('Failed to add supplement');

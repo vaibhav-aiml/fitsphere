@@ -1,34 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
-export default function WorkoutPlanDetail() {
-  const params = useParams();
+export default function WorkoutPlanDetail({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(1);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
-    fetchPlanDetails(token);
+    fetchPlanDetails();
   }, []);
 
-  const fetchPlanDetails = async (token: string) => {
+  const fetchPlanDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/workout-plans/${params.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/workout-plans/${params.id}`);
       setPlan(response.data.plan);
     } catch (error) {
       toast.error('Failed to load workout plan');
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } finally {
       setLoading(false);
     }

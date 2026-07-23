@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
   LineChart,
@@ -25,11 +25,17 @@ import {
 
 export default function AdvancedAnalytics() {
   const router = useRouter();
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedExercise, setSelectedExercise] = useState('');
   const [exercises, setExercises] = useState<string[]>([]);
+  const [selectedExercise, setSelectedExercise] = useState('');
   const [oneRMProgression, setOneRMProgression] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<any>({
+    volumeData: [],
+    totalVolume: 0,
+    totalWorkouts: 0,
+    caloriesData: [],
+    summary: {}
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -37,24 +43,16 @@ export default function AdvancedAnalytics() {
       router.push('/auth/login');
       return;
     }
-    fetchAnalytics(token);
+    fetchAnalytics();
   }, []);
 
-  const fetchAnalytics = async (token: string) => {
+  const fetchAnalytics = async () => {
     try {
       const [volumeRes, summaryRes, caloriesRes, workoutsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/analytics/volume', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/analytics/summary', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/analytics/calories', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/workout-logs?limit=100', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get('/analytics/volume'),
+        api.get('/analytics/summary'),
+        api.get('/analytics/calories'),
+        api.get('/workout-logs?limit=100')
       ]);
 
       const uniqueExercises = Array.from(new Set((workoutsRes.data.logs || []).map((log: any) => log.exerciseName))) as string[];
@@ -62,7 +60,7 @@ export default function AdvancedAnalytics() {
       if (uniqueExercises.length > 0) {
         const firstEx = uniqueExercises[0] as string;
         setSelectedExercise(firstEx);
-        await fetchOneRM(token, firstEx);
+        await fetchOneRM('', firstEx);
       }
 
       setAnalytics({
@@ -82,9 +80,7 @@ export default function AdvancedAnalytics() {
 
   const fetchOneRM = async (token: string, exercise: string) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/analytics/1rm/${exercise}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/analytics/1rm/${exercise}`);
       setOneRMProgression(response.data.progression || []);
     } catch (error) {
       console.error('Failed to fetch 1RM data:', error);
@@ -93,10 +89,7 @@ export default function AdvancedAnalytics() {
 
   const handleExerciseChange = async (exercise: string) => {
     setSelectedExercise(exercise);
-    const token = localStorage.getItem('token');
-    if (token) {
-      await fetchOneRM(token, exercise);
-    }
+    await fetchOneRM('', exercise);
   };
 
   const COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];

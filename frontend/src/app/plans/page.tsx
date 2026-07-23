@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Exercise {
@@ -52,7 +52,7 @@ interface WorkoutPlan {
   };
 }
 
-export default function WorkoutPlans() {
+export default function AdvancedPlans() {
   const router = useRouter();
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
@@ -63,17 +63,15 @@ export default function WorkoutPlans() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
-    fetchPlans(token);
+    fetchPlans();
   }, []);
 
-  const fetchPlans = async (token: string) => {
+  const fetchPlans = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/advanced-plans', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/advanced-plans');
       setPlans(response.data.plans);
       
       const powerliftingPlan = response.data.plans.find((p: WorkoutPlan) => p.type === 'powerlifting');

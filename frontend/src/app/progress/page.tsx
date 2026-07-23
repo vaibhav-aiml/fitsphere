@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function ProgressPage() {
   const router = useRouter();
   const [stats, setStats] = useState<any>(null);
-  const [workoutLogs, setWorkoutLogs] = useState([]);
-  const [bodyWeights, setBodyWeights] = useState([]);
+  const [workoutLogs, setWorkoutLogs] = useState<any[]>([]);
+  const [bodyWeights, setBodyWeights] = useState<any[]>([]);
   const [showLogForm, setShowLogForm] = useState(false);
   const [logForm, setLogForm] = useState({
     exerciseName: '',
@@ -23,18 +23,18 @@ export default function ProgressPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
-    fetchData(token);
+    fetchData();
   }, []);
 
-  const fetchData = async (token: string) => {
+  const fetchData = async () => {
     try {
       const [statsRes, logsRes, weightRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/workout-logs?limit=20', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/body-weight', { headers: { Authorization: `Bearer ${token}` } })
+        api.get('/stats'),
+        api.get('/workout-logs?limit=20'),
+        api.get('/body-weight')
       ]);
       
       setStats(statsRes.data.stats);
@@ -47,16 +47,12 @@ export default function ProgressPage() {
 
   const handleLogWorkout = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
     try {
-      await axios.post('http://localhost:5000/api/workout-logs', logForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/workout-logs', logForm);
       toast.success('Workout logged successfully!');
       setShowLogForm(false);
       setLogForm({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
-      fetchData(token!);
+      fetchData();
     } catch (error) {
       toast.error('Failed to log workout');
     }
@@ -64,15 +60,11 @@ export default function ProgressPage() {
 
   const handleLogBodyWeight = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
     try {
-      await axios.post('http://localhost:5000/api/body-weight', bodyWeightForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/body-weight', bodyWeightForm);
       toast.success('Body weight logged!');
       setBodyWeightForm({ weight: '' });
-      fetchData(token!);
+      fetchData();
     } catch (error) {
       toast.error('Failed to log body weight');
     }

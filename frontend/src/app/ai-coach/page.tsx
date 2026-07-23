@@ -82,12 +82,8 @@ export default function AICoach() {
     setInput('');
     setLoading(true);
 
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/advice', 
-        { question: input },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post('/ai/advice', { question: input });
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -104,17 +100,13 @@ export default function AICoach() {
   };
 
   const handleFormFeedback = async () => {
-    const token = localStorage.getItem('token');
     const notes = prompt("Enter your notes about the exercise (e.g., 'lower back felt tight', 'knee pain'):");
     
     if (!notes) return;
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/form-feedback', 
-        { notes, exerciseName: selectedExercise || 'your workout' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post('/ai/form-feedback', { notes, exerciseName: selectedExercise || 'your workout' });
 
       const feedbackMessage: Message = {
         id: Date.now().toString(),
@@ -131,12 +123,9 @@ export default function AICoach() {
   };
 
   const handlePlateauDetection = async () => {
-    const token = localStorage.getItem('token');
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/ai/detect-plateau${selectedExercise ? `?exerciseName=${selectedExercise}` : ''}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/ai/detect-plateau${selectedExercise ? `?exerciseName=${selectedExercise}` : ''}`);
 
       setPlateauData(response.data);
       setShowPlateauAnalysis(true);
@@ -161,12 +150,9 @@ export default function AICoach() {
       return;
     }
 
-    const token = localStorage.getItem('token');
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/ai/weight-recommendation?exerciseName=${selectedExercise}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/ai/weight-recommendation?exerciseName=${selectedExercise}`);
 
       const recommendationMessage: Message = {
         id: Date.now().toString(),

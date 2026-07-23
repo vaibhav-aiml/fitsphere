@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
@@ -32,18 +32,14 @@ export default function ExportPage() {
       router.push('/auth/login');
       return;
     }
-    fetchData(token);
+    fetchData();
   }, []);
 
-  const fetchData = async (token: string) => {
+  const fetchData = async () => {
     try {
       const [workoutsRes, profileRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/workout-logs?limit=500', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get('/workout-logs?limit=500'),
+        api.get('/profile')
       ]);
 
       const workoutData: WorkoutData[] = workoutsRes.data.logs.map((log: any) => ({

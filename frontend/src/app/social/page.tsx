@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Post {
@@ -39,13 +39,13 @@ export default function SocialFeed() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
     
     // Get user name from localStorage
-    const userData = localStorage.getItem('user');
     if (userData) {
       try {
         const user = JSON.parse(userData);
@@ -56,15 +56,12 @@ export default function SocialFeed() {
     }
     
     fetchFeed();
-    fetchRecentWorkout(token);
+    fetchRecentWorkout();
   }, []);
 
   const fetchFeed = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.get('http://localhost:5000/api/feed', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/feed');
       setPosts(response.data.posts || []);
     } catch (error) {
       console.error('Failed to fetch feed:', error);
@@ -74,11 +71,9 @@ export default function SocialFeed() {
     }
   };
 
-  const fetchRecentWorkout = async (token: string) => {
+  const fetchRecentWorkout = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/workout-logs?limit=1', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/workout-logs?limit=1');
       if (response.data.logs && response.data.logs.length > 0) {
         setRecentWorkout(response.data.logs[0]);
       }
@@ -93,12 +88,8 @@ export default function SocialFeed() {
       return;
     }
 
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:5000/api/posts', 
-        { content: newPost, privacy: postPrivacy },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post('/posts', { content: newPost, privacy: postPrivacy });
       
       if (response.data.success) {
         setPosts([response.data.post, ...posts]);
@@ -113,11 +104,8 @@ export default function SocialFeed() {
   };
 
   const handleLike = async (postId: string) => {
-    const token = localStorage.getItem('token');
     try {
-      await axios.post(`http://localhost:5000/api/posts/${postId}/like`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/posts/${postId}/like`, {});
       fetchFeed(); // Refresh to show updated likes
       toast.success('Liked! ❤️');
     } catch (error) {
@@ -131,12 +119,8 @@ export default function SocialFeed() {
       return;
     }
 
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:5000/api/share-workout', 
-        { workoutId: recentWorkout._id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post('/share-workout', { workoutId: recentWorkout._id });
       
       if (response.data.success) {
         toast.success('Workout shared! 🎉');

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Badge {
@@ -37,24 +37,18 @@ export default function Achievements() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
-    fetchData(token);
+    fetchData();
   }, []);
 
-  const fetchData = async (token: string) => {
+  const fetchData = async () => {
     try {
       const [levelRes, badgesRes, challengeRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/user-level', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/user-badges', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:5000/api/monthly-challenges', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        api.get('/user-level'),
+        api.get('/user-badges'),
+        api.get('/monthly-challenges')
       ]);
       
       setUserLevel(levelRes.data);

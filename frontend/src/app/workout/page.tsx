@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function WorkoutLogger() {
@@ -25,14 +25,12 @@ export default function WorkoutLogger() {
       router.push('/auth/login');
       return;
     }
-    fetchWorkoutHistory(token);
+    fetchWorkoutHistory();
   }, []);
 
-  const fetchWorkoutHistory = async (token: string) => {
+  const fetchWorkoutHistory = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/workout-logs', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/workout-logs');
       const uniqueExercises = Array.from(new Set((response.data.logs || []).map((log: any) => log.exerciseName))) as string[];
       setExercises(uniqueExercises);
     } catch (error) {
@@ -54,17 +52,13 @@ export default function WorkoutLogger() {
   };
 
   const handleAddExercise = async () => {
-    const token = localStorage.getItem('token');
-    
     if (!formData.exerciseName || !formData.weight || !formData.reps || !formData.sets) {
       toast.error('Please fill all required fields');
       return;
     }
 
     try {
-      await axios.post('http://localhost:5000/api/workout-logs', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/workout-logs', formData);
       
       setCurrentWorkout([...currentWorkout, { ...formData, id: Date.now() }]);
       toast.success(`${formData.exerciseName} added to workout!`);
