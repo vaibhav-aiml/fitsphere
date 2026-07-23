@@ -230,11 +230,17 @@ export default function Home() {
               {/* Iron Dial Component */}
               <div className="z-10 flex-shrink-0">
                 <IronDial
-                  value={isGuest ? '0' : (user?.totalVolume || 4850)}
+                  value={isGuest ? '0' : (user?.totalVolume || 0)}
                   max={10000}
                   label="Daily Volume"
                   unit="KG"
-                  sublabel={isGuest ? 'Sign in to record' : '74% of Target'}
+                  sublabel={
+                    isGuest
+                      ? 'Sign in to record'
+                      : (user?.totalVolume && user.totalVolume > 0)
+                      ? `${Math.round((user.totalVolume / 10000) * 100)}% of Target`
+                      : 'No volume logged today'
+                  }
                   size="md"
                 />
               </div>
@@ -282,12 +288,16 @@ export default function Home() {
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-white font-heading">
-                  {isGuest ? '0' : (user?.streak || 5)}
+                  {isGuest ? '0' : (user?.streak || 0)}
                 </span>
                 <span className="text-gray-400 text-xs font-bold">DAYS</span>
               </div>
               <p className="text-[11px] text-gray-500 mt-2">
-                {isGuest ? 'Build your workout momentum' : '5 days active streak!'}
+                {isGuest
+                  ? 'Build your workout momentum'
+                  : (user?.streak && user.streak > 0)
+                  ? `${user.streak} days active streak!`
+                  : 'Start your streak today'}
               </p>
             </div>
 
@@ -299,14 +309,14 @@ export default function Home() {
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-white font-heading">
-                  {isGuest ? '0' : (user?.weeklyWorkouts || 3)}
+                  {isGuest ? '0' : (user?.weeklyWorkouts || 0)}
                 </span>
                 <span className="text-gray-400 text-xs font-bold">/ 4 SESSIONS</span>
               </div>
               <div className="w-full bg-[#0D1117] rounded-full h-1.5 mt-3 overflow-hidden neu-inset">
                 <div 
                   className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
-                  style={{ width: isGuest ? '0%' : `${Math.min(100, ((user?.weeklyWorkouts || 3) / 4) * 100)}%` }} 
+                  style={{ width: isGuest ? '0%' : `${Math.min(100, (((user?.weeklyWorkouts || 0) / 4) * 100))}%` }} 
                 />
               </div>
             </div>
