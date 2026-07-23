@@ -52,10 +52,20 @@ export default function Dashboard() {
       setWorkoutPlans(plansRes.data.recommendations || []);
     } catch (err: any) {
       console.error('Failed to load dashboard:', err);
-      setError(err.response?.data?.error || 'Session expired or failed to load profile.');
-      toast.error('Session expired. Please login again.');
-      localStorage.clear();
-      router.replace('/auth/login');
+      const status = err.response?.status;
+
+      if (status === 401 || status === 403) {
+        setError('Session expired or failed to load profile.');
+        toast.error('Session expired. Please login again.');
+        localStorage.clear();
+        router.replace('/auth/login');
+      } else if (status === 429) {
+        setError('Too many requests — please wait a moment and refresh.');
+        toast.error('Rate limited. Please wait a moment before retrying.');
+      } else {
+        setError(err.response?.data?.error || 'Failed to load profile.');
+        toast.error('Something went wrong loading your dashboard.');
+      }
     } finally {
       setLoading(false);
     }
