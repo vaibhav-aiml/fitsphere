@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function Signup() {
@@ -22,7 +22,7 @@ export default function Signup() {
     setLoading(true);
     
     try {
-      const response = await axios.post('http://localhost:5000/api/register', formData);
+      const response = await api.post('/register', formData);
       
       if (response.data.success) {
         toast.success('Account created successfully!');
