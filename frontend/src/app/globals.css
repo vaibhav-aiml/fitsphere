@@ -1,21 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #090C10;
+  --foreground: #F9FAFB;
+  --surface-charcoal: #11161F;
+  --surface-elevated: #18202C;
+  --accent-blaze: #FF5500;
+  --border-muted: #202938;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Accessibility: Custom High-Contrast Focus Ring */
+*:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #090C10, 0 0 0 4px #FF5500 !important;
+}
+
+/* Neumorphic Utilities */
+.neu-raised {
+  background: #11161F;
+  box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.6), -3px -3px 9px rgba(255, 255, 255, 0.03);
+  border: 1px solid #202938;
+}
+
+.neu-raised:hover {
+  box-shadow: 7px 7px 16px rgba(0, 0, 0, 0.7), -4px -4px 12px rgba(255, 255, 255, 0.05);
+}
+
+.neu-inset {
+  background: #0D1118;
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.7), inset -2px -2px 4px rgba(255, 255, 255, 0.04);
+  border: 1px solid #1C2432;
+}
+
+/* Iron Dial Glow Pulse Animation */
+@keyframes dialGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 85, 0, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 85, 0, 0.7));
+  }
+}
+
+/* Custom Sleek Scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.sleek-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.sleek-scrollbar::-webkit-scrollbar-track {
+  background: #0D1117;
+}
+.sleek-scrollbar::-webkit-scrollbar-thumb {
+  background: #202938;
+  border-radius: 4px;
+}
+.sleek-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #FF5500;
+}
+
+.iron-dial-glow {
+  animation: dialGlow 3s infinite ease-in-out;
+}
+
+/* Motion Accessibility Fallback */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .iron-dial-glow {
+    animation: none !important;
+    filter: drop-shadow(0 0 8px rgba(255, 85, 0, 0.4));
+  }
 }

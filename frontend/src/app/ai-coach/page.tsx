@@ -172,71 +172,51 @@ export default function AICoach() {
     "I think I hit a plateau, what should I do?",
     "Give me form tips for better results",
     "How much weight should I add next session?",
-    "How can I recover faster?",
-    "I'm losing motivation, help me!",
-    "What should I eat for better performance?"
+    "How can I recover faster?"
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] p-4 sm:p-6 md:p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
+        
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <button
-              onClick={() => router.back()}
-              className="text-blue-500 hover:text-blue-400 transition mb-2 block"
+              onClick={() => router.push('/')}
+              className="text-[#FF5500] hover:text-[#E04B00] text-xs font-bold font-heading uppercase tracking-wider transition mb-2 block focus-visible:ring-2 focus-visible:ring-[#FF5500]"
             >
               ← Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-white">🤖 AI Coach</h1>
-            <p className="text-gray-400 mt-1">Your personal fitness assistant powered by AI</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight">
+              🤖 FITSPHERE AI ATHLETIC COACH
+            </h1>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">
+              Personalized training guidance, plateau analysis, and progressive overload calculations
+            </p>
           </div>
-          <div className="flex gap-3">
+
+          <div className="flex gap-2">
             <button
               onClick={handleFormFeedback}
               disabled={loading}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
+              className="px-4 py-2.5 bg-[#18202C] hover:bg-[#202938] text-white text-xs font-bold font-heading uppercase rounded-xl border border-[#202938] neu-raised transition"
             >
-              📝 Form Feedback
+              📝 Form Advice
             </button>
             <button
               onClick={handlePlateauDetection}
               disabled={loading}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+              className="px-4 py-2.5 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold font-heading uppercase rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)]"
             >
               🔍 Detect Plateau
             </button>
           </div>
         </div>
 
-        {/* Exercise Selector */}
-        <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 mb-6">
-          <div className="flex gap-4 items-center flex-wrap">
-            <label className="text-gray-300">Select Exercise:</label>
-            <select
-              value={selectedExercise}
-              onChange={(e) => setSelectedExercise(e.target.value)}
-              className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 flex-1"
-            >
-              <option value="">-- Select an exercise --</option>
-              {exercises.map(ex => (
-                <option key={ex} value={ex}>{ex}</option>
-              ))}
-            </select>
-            <button
-              onClick={handleWeightRecommendation}
-              disabled={loading || !selectedExercise}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50"
-            >
-              ⚡ Get Weight Recommendation
-            </button>
-          </div>
-        </div>
-
-        {/* Quick Questions */}
-        <div className="bg-gray-800/30 p-4 rounded-xl border border-gray-700 mb-6">
-          <p className="text-gray-400 text-sm mb-3">Quick Questions:</p>
+        {/* Quick Question Chips */}
+        <div className="bg-[#11161F] p-4 rounded-2xl border border-[#202938] neu-raised">
+          <p className="text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">Quick Coaching Prompts:</p>
           <div className="flex flex-wrap gap-2">
             {quickQuestions.map((q, idx) => (
               <button
@@ -245,7 +225,7 @@ export default function AICoach() {
                   setInput(q);
                   setTimeout(() => handleSendMessage(), 100);
                 }}
-                className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full transition"
+                className="text-xs bg-[#0D1117] hover:bg-[#18202C] text-gray-300 hover:text-white px-3.5 py-1.5 rounded-xl border border-[#202938] neu-inset transition"
               >
                 {q}
               </button>
@@ -253,35 +233,35 @@ export default function AICoach() {
           </div>
         </div>
 
-        {/* Chat Messages */}
-        <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
-          <div className="h-[500px] overflow-y-auto p-6 space-y-4">
+        {/* Chat Viewport */}
+        <div className="bg-[#11161F] rounded-3xl border border-[#202938] neu-raised overflow-hidden">
+          <div className="h-[460px] overflow-y-auto p-6 space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-4 rounded-2xl ${
+                  className={`max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl ${
                     message.isUser
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-200'
+                      ? 'bg-[#FF5500] text-white font-semibold shadow-[0_0_15px_rgba(255,85,0,0.25)]'
+                      : 'bg-[#0D1117] text-gray-200 border border-[#202938] neu-inset'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.text}</p>
-                  <p className="text-xs opacity-70 mt-2">
-                    {message.timestamp.toLocaleTimeString()}
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.text}</p>
+                  <p className="text-[10px] opacity-60 mt-2 font-mono">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-700 p-4 rounded-2xl">
+                <div className="bg-[#0D1117] p-4 rounded-2xl border border-[#202938]">
                   <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                    <div className="w-2 h-2 bg-[#FF5500] rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-[#FF5500] rounded-full animate-bounce delay-100" />
+                    <div className="w-2 h-2 bg-[#FF5500] rounded-full animate-bounce delay-200" />
                   </div>
                 </div>
               </div>
@@ -289,22 +269,22 @@ export default function AICoach() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
-          <div className="border-t border-gray-700 p-4">
+          {/* Input Controls */}
+          <div className="border-t border-[#202938] p-4 bg-[#090C10]">
             <div className="flex gap-3">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask me anything about fitness, form, nutrition, or plateaus..."
-                className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Ask your AI Coach about training, sets, reps, or nutrition..."
+                className="flex-1 px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
                 disabled={loading}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={loading || !input.trim()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                className="bg-[#FF5500] hover:bg-[#E04B00] text-white font-extrabold font-heading uppercase text-xs px-6 py-3 rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)] disabled:opacity-50"
               >
                 Send
               </button>
@@ -312,30 +292,8 @@ export default function AICoach() {
           </div>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-xl border border-blue-700">
-            <div className="text-2xl mb-2">🎯</div>
-            <p className="text-white font-semibold">Plateau Detection</p>
-            <p className="text-gray-400 text-sm">Identify when you're stuck</p>
-          </div>
-          <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-xl border border-green-700">
-            <div className="text-2xl mb-2">📝</div>
-            <p className="text-white font-semibold">Form Feedback</p>
-            <p className="text-gray-400 text-sm">Get tips from your notes</p>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 rounded-xl border border-yellow-700">
-            <div className="text-2xl mb-2">⚡</div>
-            <p className="text-white font-semibold">Weight Recs</p>
-            <p className="text-gray-400 text-sm">Smart progression</p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-xl border border-purple-700">
-            <div className="text-2xl mb-2">🤖</div>
-            <p className="text-white font-semibold">24/7 Coach</p>
-            <p className="text-gray-400 text-sm">Always here to help</p>
-          </div>
-        </div>
       </div>
+
       <AuthModal
         isOpen={modalOpen}
         onClose={closeModal}

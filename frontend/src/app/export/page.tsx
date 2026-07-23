@@ -6,7 +6,6 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { saveAs } from 'file-saver';
-import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 interface WorkoutData {
@@ -66,6 +65,10 @@ export default function ExportPage() {
   };
 
   const exportToCSV = () => {
+    if (workouts.length === 0) {
+      toast.error('No workouts to export');
+      return;
+    }
     const headers = ['Date', 'Exercise', 'Weight (kg)', 'Reps', 'Sets', 'Volume (kg)', '1RM (kg)'];
     const csvRows = [headers.join(',')];
     
@@ -90,30 +93,25 @@ export default function ExportPage() {
   const shareAsImage = async () => {
     if (!shareRef.current) return;
     
-    const canvas = await html2canvas(shareRef.current, { scale: 2, backgroundColor: '#1f2937' });
+    const canvas = await html2canvas(shareRef.current, { scale: 2, backgroundColor: '#090C10' });
     
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      const file = new File([blob], `fitsphere_share.png`, { type: 'image/png' });
-      
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: 'FitSphere Progress', files: [file] });
-        } catch (e) { console.log('Share cancelled'); }
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'fitsphere_share.png';
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-      toast.success('Image ready!');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fitsphere_share.png';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Image downloaded!');
     }, 'image/png');
   };
 
   const copyShareText = () => {
-    if (workouts.length === 0) return;
+    if (workouts.length === 0) {
+      toast.error('No workouts to copy');
+      return;
+    }
     const lastWorkout = workouts[0];
     const shareText = `💪 Just crushed my workout on FitSphere!\n\n🏋️ ${lastWorkout.exerciseName}: ${lastWorkout.weight}kg × ${lastWorkout.reps} reps × ${lastWorkout.sets} sets\n📊 Volume: ${lastWorkout.volume}kg\n🎯 1RM: ${lastWorkout.oneRM}kg\n\n#FitSphere #Fitness #Workout`;
     navigator.clipboard.writeText(shareText);
@@ -122,8 +120,8 @@ export default function ExportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-[#090C10] flex items-center justify-center">
+        <div className="text-[#FF5500] font-black font-heading text-xl">Loading Export Tools...</div>
       </div>
     );
   }
@@ -132,93 +130,106 @@ export default function ExportPage() {
   const uniqueExercises = [...new Set(workouts.map(w => w.exerciseName))].length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] p-4 sm:p-6 md:p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <button onClick={() => router.back()} className="text-blue-500 hover:text-blue-400 transition mb-2 block">
+            <button
+              onClick={() => router.push('/')}
+              className="text-[#FF5500] hover:text-[#E04B00] text-xs font-bold font-heading uppercase tracking-wider transition mb-2 block focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+            >
               ← Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-white">📤 Export & Share</h1>
-            <p className="text-gray-400 mt-1">Export your workout data and share progress</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight">
+              📦 EXPORT & SHARE DATA
+            </h1>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">
+              Download your workout history as CSV, create shareable summary cards, or copy workout summaries
+            </p>
           </div>
         </div>
 
-        {/* Export Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <button onClick={exportToCSV} className="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition text-center">
-            <div className="text-2xl mb-2">📊</div>
-            <p className="font-semibold">Export CSV</p>
-            <p className="text-xs opacity-80">Download spreadsheet</p>
+        {/* Action Bento Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <button 
+            onClick={exportToCSV} 
+            className="bg-[#11161F] hover:bg-[#18202C] p-6 rounded-3xl border border-[#202938] hover:border-[#FF5500]/50 neu-raised transition text-center space-y-2 group focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+          >
+            <div className="text-3xl mb-2 group-hover:scale-110 transition">📊</div>
+            <h3 className="font-bold text-white font-heading text-base group-hover:text-[#FF5500] transition">Export CSV File</h3>
+            <p className="text-gray-400 text-xs">Download full log spreadsheet</p>
           </button>
-          <button onClick={shareAsImage} className="bg-pink-600 text-white p-4 rounded-xl hover:bg-pink-700 transition text-center">
-            <div className="text-2xl mb-2">📸</div>
-            <p className="font-semibold">Share as Image</p>
-            <p className="text-xs opacity-80">Share on social media</p>
+
+          <button 
+            onClick={shareAsImage} 
+            className="bg-[#11161F] hover:bg-[#18202C] p-6 rounded-3xl border border-[#202938] hover:border-[#FF5500]/50 neu-raised transition text-center space-y-2 group focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+          >
+            <div className="text-3xl mb-2 group-hover:scale-110 transition">📸</div>
+            <h3 className="font-bold text-white font-heading text-base group-hover:text-[#FF5500] transition">Share Card Image</h3>
+            <p className="text-gray-400 text-xs">Generate graphic card for social media</p>
           </button>
-          <button onClick={copyShareText} className="bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition text-center">
-            <div className="text-2xl mb-2">📝</div>
-            <p className="font-semibold">Copy Share Text</p>
-            <p className="text-xs opacity-80">Paste on Instagram/Twitter</p>
+
+          <button 
+            onClick={copyShareText} 
+            className="bg-[#11161F] hover:bg-[#18202C] p-6 rounded-3xl border border-[#202938] hover:border-[#FF5500]/50 neu-raised transition text-center space-y-2 group focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+          >
+            <div className="text-3xl mb-2 group-hover:scale-110 transition">📝</div>
+            <h3 className="font-bold text-white font-heading text-base group-hover:text-[#FF5500] transition">Copy Summary Text</h3>
+            <p className="text-gray-400 text-xs">Copy formatted workout stats</p>
           </button>
         </div>
 
-        {/* Hidden Share Content */}
+        {/* Hidden Share Canvas Content */}
         <div ref={shareRef} className="hidden">
-          <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl" style={{ width: '500px' }}>
-            <div className="text-center">
-              <div className="text-5xl mb-4">💪</div>
-              <h2 className="text-2xl font-bold text-white">FitSphere Progress</h2>
-              <p className="text-gray-400">{userName}</p>
-              <hr className="my-4 border-gray-700" />
-              <div className="text-left">
-                <p className="text-white">🏋️ Workouts: {workouts.length}</p>
-                <p className="text-white">📊 Total Volume: {totalVolume.toLocaleString()} kg</p>
-                <p className="text-white">🎯 Unique Exercises: {uniqueExercises}</p>
+          <div className="bg-[#090C10] p-8 rounded-3xl border border-[#202938]" style={{ width: '500px' }}>
+            <div className="text-center space-y-4">
+              <div className="text-5xl">⚡</div>
+              <h2 className="text-3xl font-black text-white font-heading">FITSPHERE ATHLETE STATS</h2>
+              <p className="text-[#FF5500] font-bold text-sm">{userName}</p>
+              <div className="grid grid-cols-3 gap-3 text-left pt-4 border-t border-[#202938]">
+                <div>
+                  <span className="text-gray-500 text-[10px] uppercase font-heading">Sessions</span>
+                  <p className="text-white font-black text-lg">{workouts.length}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-[10px] uppercase font-heading">Volume</span>
+                  <p className="text-[#FF5500] font-black text-lg">{totalVolume.toLocaleString()} KG</p>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-[10px] uppercase font-heading">Movements</span>
+                  <p className="text-white font-black text-lg">{uniqueExercises}</p>
+                </div>
               </div>
-              <hr className="my-4 border-gray-700" />
-              <p className="text-blue-400">#FitSphere #Fitness #Progress</p>
             </div>
           </div>
         </div>
 
-        {/* Stats Preview */}
-        <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-4">📊 Your Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-700/50 p-4 rounded-lg text-center">
-              <p className="text-gray-400 text-sm">Total Workouts</p>
-              <p className="text-white text-3xl font-bold">{workouts.length}</p>
+        {/* Stats Summary Bento Container */}
+        <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised space-y-6">
+          <h2 className="text-2xl font-black text-white font-heading">📊 LOG SUMMARY OVERVIEW</h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938]">
+              <span className="text-gray-400 text-xs font-bold uppercase font-heading">Total Workouts</span>
+              <p className="text-3xl font-black text-white font-heading mt-1">{workouts.length}</p>
             </div>
-            <div className="bg-gray-700/50 p-4 rounded-lg text-center">
-              <p className="text-gray-400 text-sm">Total Volume</p>
-              <p className="text-white text-3xl font-bold">{totalVolume.toLocaleString()} kg</p>
-            </div>
-            <div className="bg-gray-700/50 p-4 rounded-lg text-center">
-              <p className="text-gray-400 text-sm">Unique Exercises</p>
-              <p className="text-white text-3xl font-bold">{uniqueExercises}</p>
-            </div>
-          </div>
 
-          <h3 className="text-lg font-bold text-white mb-3">🏆 Best Lifts</h3>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {Object.entries(
-              workouts.reduce((acc: any, w) => {
-                if (!acc[w.exerciseName] || w.oneRM > acc[w.exerciseName]) {
-                  acc[w.exerciseName] = w.oneRM;
-                }
-                return acc;
-              }, {})
-            ).slice(0, 5).map(([exercise, oneRM]) => (
-              <div key={exercise} className="bg-gray-700/30 p-3 rounded-lg flex justify-between">
-                <span className="text-white">{exercise}</span>
-                <span className="text-yellow-400 font-bold">{oneRM as number} kg</span>
-              </div>
-            ))}
+            <div className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938]">
+              <span className="text-gray-400 text-xs font-bold uppercase font-heading">Cumulative Volume</span>
+              <p className="text-3xl font-black text-white font-heading mt-1">{totalVolume.toLocaleString()} <span className="text-xs text-[#FF5500]">KG</span></p>
+            </div>
+
+            <div className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938]">
+              <span className="text-gray-400 text-xs font-bold uppercase font-heading">Unique Movements</span>
+              <p className="text-3xl font-black text-white font-heading mt-1">{uniqueExercises}</p>
+            </div>
           </div>
         </div>
+
       </div>
+
       <AuthModal
         isOpen={modalOpen}
         onClose={closeModal}

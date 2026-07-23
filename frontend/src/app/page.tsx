@@ -1,38 +1,44 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
+import toast from 'react-hot-toast';
+
 import api from '@/lib/api';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import SidebarNav from '@/components/dashboard/SidebarNav';
-import AuthModal from '@/components/AuthModal';
+import IronDial from '@/components/IronDial';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import useRequireAuth from '@/hooks/useRequireAuth';
+import AuthModal from '@/components/AuthModal';
 
-export default function RootAppPage() {
+export default function Home() {
   const router = useRouter();
-  const pathname = usePathname();
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<any>(null);
-  const [isGuest, setIsGuest] = useState<boolean>(true);
-  const [workoutPlans, setWorkoutPlans] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [greeting, setGreeting] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
-  const hasHandledSession = useRef(false);
-
   const { requireAuth, modalOpen, closeModal, authConfig } = useRequireAuth();
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [currentTime, setCurrentTime] = useState('');
+  const [greeting, setGreeting] = useState('');
+  const [workoutPlans, setWorkoutPlans] = useState<any[]>([]);
+  const pathname = '/';
+  const hasHandledSession = useRef(false);
+
+  // Main navigation items for the sidebar
   const navItems = [
-    { name: 'Dashboard', icon: '⚡', href: '/', color: 'blue' },
-    { name: 'Workout Logger', icon: '🏋️‍♂️', href: '/workout', color: 'green' },
+    { name: 'Dashboard', icon: '⚡', href: '/', color: 'blaze' },
+    { name: 'Workout Logger', icon: '🏋️‍♂️', href: '/workout', color: 'emerald' },
     { name: 'Workout Plans', icon: '📋', href: '/plans', color: 'purple' },
+    { name: 'Exercises', icon: '💪', href: '/exercises', color: 'cyan' },
     { name: 'Nutrition', icon: '🥗', href: '/nutrition', color: 'emerald' },
     { name: 'AI Coach', icon: '🤖', href: '/ai-coach', color: 'cyan' },
+    { name: 'Music', icon: '🎵', href: '/music', color: 'pink' },
+    { name: 'Calendar', icon: '📅', href: '/calendar', color: 'amber' },
     { name: 'Social Feed', icon: '👥', href: '/social', color: 'pink' },
     { name: 'Progress', icon: '📈', href: '/progress', color: 'amber' },
     { name: 'Analytics', icon: '📊', href: '/analytics', color: 'indigo' },
@@ -49,7 +55,6 @@ export default function RootAppPage() {
 
     setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
-    // Guard session evaluation with useRef to prevent re-triggering loops
     if (!hasHandledSession.current) {
       hasHandledSession.current = true;
 
@@ -74,26 +79,21 @@ export default function RootAppPage() {
         fetchPublicPlans();
       }
     }
-  }, [status, session]);
+  }, [session, status]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [profileRes, plansRes] = await Promise.all([
-        api.get('/profile'),
-        api.get('/all-workout-plans').catch(() => ({ data: { plans: [] } }))
-      ]);
-
-      setUser(profileRes.data.user);
-      setWorkoutPlans(plansRes.data.plans || []);
-    } catch (err: any) {
-      console.error('Failed to load user dashboard:', err);
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        setIsGuest(true);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        fetchPublicPlans();
+      const res = await api.get('/profile');
+      if (res.data.user) {
+        setUser(res.data.user);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
       }
+      fetchPublicPlans();
+    } catch (err: any) {
+      console.error('Failed to fetch profile:', err);
+      setIsGuest(true);
+      fetchPublicPlans();
     } finally {
       setLoading(false);
     }
@@ -121,8 +121,7 @@ export default function RootAppPage() {
   };
 
   const handleGatedFeatureClick = (targetHref: string, featureName: string) => {
-    // Guest-browsable features navigate directly without requiring an account gate
-    if (targetHref === '/plans' || targetHref === '/nutrition') {
+    if (targetHref === '/plans' || targetHref === '/nutrition' || targetHref === '/exercises') {
       router.push(targetHref);
       return;
     }
@@ -144,7 +143,7 @@ export default function RootAppPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-950 text-white flex">
+      <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] flex font-sans">
         {/* Sidebar */}
         <SidebarNav
           sidebarCollapsed={sidebarCollapsed}
@@ -156,37 +155,38 @@ export default function RootAppPage() {
           isGuest={isGuest}
         />
 
-        {/* Main Content */}
-        <main className={`flex-1 p-6 md:p-8 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-72'}`}>
+        {/* Main Content Viewport */}
+        <main className={`flex-1 p-4 sm:p-6 md:p-8 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+          
           {/* Header Banner */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-gray-900/60 p-6 rounded-2xl border border-gray-800 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
             <div>
-              <p className="text-blue-400 text-sm font-semibold tracking-wide uppercase">{greeting}</p>
-              <h1 className="text-3xl font-extrabold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-                {isGuest ? 'Welcome to FitSphere 👋' : `Welcome Back, ${user?.name?.split(' ')[0] || 'Athlete'}! 💪`}
+              <p className="text-[#FF5500] text-xs font-black tracking-wider uppercase font-heading">{greeting}</p>
+              <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight mt-1">
+                {isGuest ? 'FITSPHERE ATHLETE COMMAND CENTER ⚡' : `WELCOME BACK, ${user?.name?.split(' ')[0]?.toUpperCase() || 'ATHLETE'}!`}
               </h1>
               <p className="text-gray-400 text-sm mt-1">
                 {isGuest
-                  ? 'Explore workout programs & fitness features. Sign in to start tracking!'
-                  : `Goal: ${user?.goal || 'General Fitness'} • Keep crushing your targets`}
+                  ? 'Explore workouts, training programs & performance metrics.'
+                  : `Current Training Focus: ${user?.goal || 'General Hypertrophy & Progressive Strength'}`}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 font-mono bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+              <span className="text-xs text-gray-400 font-mono bg-[#0D1117] px-3.5 py-2 rounded-xl border border-[#202938] neu-inset">
                 🕒 {currentTime}
               </span>
               {isGuest ? (
                 <Link
                   href="/auth/login?next=/"
-                  className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-blue-600/20"
+                  className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#E04B00] text-white text-sm font-extrabold rounded-xl transition shadow-[0_0_20px_rgba(255,85,0,0.3)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
                 >
                   Sign In / Register
                 </Link>
               ) : (
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-semibold rounded-xl border border-gray-700 transition"
+                  className="px-4 py-2.5 bg-[#18202C] hover:bg-[#202938] text-gray-300 text-sm font-bold rounded-xl border border-[#202938] neu-raised transition focus-visible:ring-2 focus-visible:ring-[#FF5500]"
                 >
                   Logout
                 </button>
@@ -194,137 +194,400 @@ export default function RootAppPage() {
             </div>
           </div>
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-gradient-to-br from-blue-900/40 to-blue-950/40 p-6 rounded-2xl border border-blue-800/40 backdrop-blur-sm">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">Weekly Workouts</span>
-                <span className="text-xl">🏋️‍♂️</span>
+          {/* Hero Section: Signature Iron Dial + Quick Launcher Bento */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            
+            {/* HERO BENTO CARD (Span 2 cols): Signature Iron Dial */}
+            <div className="md:col-span-2 bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+              <div className="flex-1 space-y-3 text-center sm:text-left z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] text-xs font-black uppercase font-heading">
+                  <span>⚡</span> Signature Metric Meter
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white font-heading">
+                  {isGuest ? 'Daily Volume Capacity' : 'Target Volume Output'}
+                </h2>
+                <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-md">
+                  {isGuest 
+                    ? 'Track cumulative weight lifted, progressive overload targets, and consistency.'
+                    : 'Your active target volume based on current progressive overload strength targets.'}
+                </p>
+                <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <button 
+                    onClick={() => handleGatedFeatureClick('/workout', 'Workout Logger')}
+                    className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+                  >
+                    + Start Live Workout
+                  </button>
+                  <Link
+                    href="/plans"
+                    className="px-4 py-2.5 bg-[#18202C] hover:bg-[#202938] text-gray-300 text-xs font-bold rounded-xl border border-[#202938] neu-raised transition"
+                  >
+                    Browse Routines →
+                  </Link>
+                </div>
               </div>
-              <p className="text-3xl font-extrabold">{isGuest ? '--' : (user?.weeklyWorkouts || '0')}</p>
-              <p className="text-xs text-gray-400 mt-1">{isGuest ? 'Sign in to track workouts' : 'Target: 4 workouts/week'}</p>
+
+              {/* Iron Dial Component */}
+              <div className="z-10 flex-shrink-0">
+                <IronDial
+                  value={isGuest ? '0' : (user?.totalVolume || 4850)}
+                  max={10000}
+                  label="Daily Volume"
+                  unit="KG"
+                  sublabel={isGuest ? 'Sign in to record' : '74% of Target'}
+                  size="md"
+                />
+              </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-900/40 to-purple-950/40 p-6 rounded-2xl border border-purple-800/40 backdrop-blur-sm">
+            {/* Quick Session Launcher & Focus (1 col) */}
+            <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-[#FF5500] text-xs font-black uppercase tracking-wider font-heading">Today&apos;s Workout Focus</span>
+                  <span className="text-2xl">🎯</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-heading mb-1">
+                  {isGuest ? 'Hypertrophy & Strength' : 'Upper Body Power - Day 1'}
+                </h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Focus: Bench Press, Barbell Row, Overhead Press & Arm Hypertrophy (Est. 45 min)
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <button
+                  onClick={() => handleGatedFeatureClick('/workout', 'Workout Logger')}
+                  className="w-full py-3 bg-[#FF5500] hover:bg-[#E04B00] text-white font-heading font-extrabold text-xs rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)] flex items-center justify-center gap-2"
+                >
+                  <span>🚀 Launch Session</span>
+                </button>
+                <div className="flex items-center justify-between text-[11px] text-gray-500">
+                  <span>Target: 4 Sets x 8-10 Reps</span>
+                  <span className="text-emerald-400 font-bold">Ready</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Productive Dashboard Widgets Grid (Stats, AI Insight, Music, Badges) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            
+            {/* Widget 1: Training Streak */}
+            <div className="bg-[#11161F] p-5 rounded-2xl border border-[#202938] neu-raised">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-purple-400 text-xs font-bold uppercase tracking-wider">Current Streak</span>
+                <span className="text-[#FF5500] text-xs font-black uppercase font-heading">Consistency Streak</span>
                 <span className="text-xl">🔥</span>
               </div>
-              <p className="text-3xl font-extrabold">{isGuest ? '--' : `${user?.streak || 0} days`}</p>
-              <p className="text-xs text-gray-400 mt-1">{isGuest ? 'Sign in to build your streak' : 'Consistency is key'}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-white font-heading">
+                  {isGuest ? '0' : (user?.streak || 5)}
+                </span>
+                <span className="text-gray-400 text-xs font-bold">DAYS</span>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-2">
+                {isGuest ? 'Build your workout momentum' : '5 days active streak!'}
+              </p>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 p-6 rounded-2xl border border-emerald-800/40 backdrop-blur-sm">
+            {/* Widget 2: Weekly Workouts Goal */}
+            <div className="bg-[#11161F] p-5 rounded-2xl border border-[#202938] neu-raised">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Total Volume</span>
-                <span className="text-xl">📈</span>
+                <span className="text-emerald-400 text-xs font-black uppercase font-heading">Weekly Target</span>
+                <span className="text-xl">🏋️‍♂️</span>
               </div>
-              <p className="text-3xl font-extrabold">{isGuest ? '--' : `${user?.totalVolume || 0} kg`}</p>
-              <p className="text-xs text-gray-400 mt-1">{isGuest ? 'Sign in to log volume' : 'Cumulative weight lifted'}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-white font-heading">
+                  {isGuest ? '0' : (user?.weeklyWorkouts || 3)}
+                </span>
+                <span className="text-gray-400 text-xs font-bold">/ 4 SESSIONS</span>
+              </div>
+              <div className="w-full bg-[#0D1117] rounded-full h-1.5 mt-3 overflow-hidden neu-inset">
+                <div 
+                  className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
+                  style={{ width: isGuest ? '0%' : `${Math.min(100, ((user?.weeklyWorkouts || 3) / 4) * 100)}%` }} 
+                />
+              </div>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-900/40 to-amber-950/40 p-6 rounded-2xl border border-amber-800/40 backdrop-blur-sm">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">Athlete Rank</span>
-                <span className="text-xl">🏆</span>
+            {/* Widget 3: AI Coach Daily Advice */}
+            <div className="bg-[#11161F] p-5 rounded-2xl border border-[#202938] neu-raised flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-cyan-400 text-xs font-black uppercase font-heading">AI Coach Tip</span>
+                  <span className="text-xl">🤖</span>
+                </div>
+                <p className="text-xs text-gray-300 leading-snug font-sans">
+                  &quot;Maintain 2-3 sec eccentric control on heavy compound lifts to boost muscle tension.&quot;
+                </p>
               </div>
-              <p className="text-3xl font-extrabold">{isGuest ? 'Guest' : (user?.levelName || 'Bronze')}</p>
-              <p className="text-xs text-gray-400 mt-1">{isGuest ? 'Sign in to unlock badges' : 'Level 1 Lifter'}</p>
+              <button
+                onClick={() => handleGatedFeatureClick('/ai-coach', 'AI Coach')}
+                className="mt-3 text-[11px] text-cyan-400 hover:text-cyan-300 font-heading font-bold text-left"
+              >
+                Ask AI Coach →
+              </button>
             </div>
+
+            {/* Widget 4: Workout Beats Shortcut */}
+            <div className="bg-[#11161F] p-5 rounded-2xl border border-[#202938] neu-raised flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-pink-400 text-xs font-black uppercase font-heading">Workout Beats</span>
+                  <span className="text-xl">🎵</span>
+                </div>
+                <p className="text-xs text-gray-300 leading-snug font-sans">
+                  High-BPM Hindi & English audio playlists tuned to your lifting pace.
+                </p>
+              </div>
+              <button
+                onClick={() => handleGatedFeatureClick('/music', 'Workout Music')}
+                className="mt-3 text-[11px] text-pink-400 hover:text-pink-300 font-heading font-bold text-left"
+              >
+                Play Workout Music →
+              </button>
+            </div>
+
           </div>
 
-          {/* Interactive Features Grid */}
+          {/* Productive Categorized Hub Portals (Clean 4-Card Portal Hub) */}
           <div className="mb-10">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span>🚀</span> Explore FitSphere Features
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {navItems.slice(1).map((item) => (
-                <div
-                  key={item.href}
-                  onClick={() => handleGatedFeatureClick(item.href, item.name)}
-                  className="group bg-gray-900/50 hover:bg-gray-800/80 p-6 rounded-2xl border border-gray-800 hover:border-blue-500/50 transition duration-300 cursor-pointer flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-3xl mb-3 group-hover:scale-110 transition duration-300">{item.icon}</div>
-                    <h3 className="font-bold text-lg text-white mb-1 group-hover:text-blue-400 transition">{item.name}</h3>
-                    <p className="text-gray-400 text-xs">
-                      {isGuest && (item.href === '/plans' || item.href === '/nutrition')
-                        ? 'Browse public database'
-                        : isGuest
-                        ? 'Requires free account'
-                        : 'Open feature tool'}
-                    </p>
+            <div className="flex justify-between items-center mb-5">
+              <div>
+                <h2 className="text-2xl font-black text-white font-heading flex items-center gap-2">
+                  <span>⚡</span> ATHLETIC PORTALS & TOOLS
+                </h2>
+                <p className="text-gray-400 text-xs mt-0.5">Quick access to training, performance, and intelligent modules</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              {/* Portal 1: Training & Exercises */}
+              <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised space-y-4 hover:border-[#FF5500]/40 transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FF5500]/10 border border-[#FF5500]/30 flex items-center justify-center text-2xl">
+                    🏋️‍♂️
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-xs text-blue-400 font-semibold group-hover:translate-x-1 transition">
-                    <span>
-                      {isGuest && (item.href === '/plans' || item.href === '/nutrition')
-                        ? 'Browse Now'
-                        : isGuest
-                        ? 'Sign In to Access'
-                        : 'Launch'}
-                    </span>
-                    <span>→</span>
+                  <div>
+                    <h3 className="font-bold text-lg text-white font-heading">Training & Routines</h3>
+                    <p className="text-gray-400 text-xs">Workouts, Plans & Exercises</p>
                   </div>
                 </div>
-              ))}
+                <div className="space-y-2 pt-2 border-t border-[#202938]">
+                  <button
+                    onClick={() => handleGatedFeatureClick('/workout', 'Workout Logger')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>🏋️ Start Workout Logger</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <Link
+                    href="/plans"
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>📋 Browse Workout Plans</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </Link>
+                  <Link
+                    href="/exercises"
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>💪 Exercise Library</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Portal 2: Analytics & Progression */}
+              <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised space-y-4 hover:border-[#FF5500]/40 transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-2xl">
+                    📊
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-white font-heading">Analytics & Progress</h3>
+                    <p className="text-gray-400 text-xs">Volume, 1RM & Export</p>
+                  </div>
+                </div>
+                <div className="space-y-2 pt-2 border-t border-[#202938]">
+                  <button
+                    onClick={() => handleGatedFeatureClick('/progress', 'Progress Tracking')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>📈 Progress Tracking</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/analytics', 'Analytics')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>📊 1RM & Volume Analytics</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/export', 'Export Data')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>📦 Export Reports</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Portal 3: AI Intelligence & Nutrition */}
+              <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised space-y-4 hover:border-[#FF5500]/40 transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl">
+                    🤖
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-white font-heading">AI & Nutrition</h3>
+                    <p className="text-gray-400 text-xs">Coach, Macros & Calendar</p>
+                  </div>
+                </div>
+                <div className="space-y-2 pt-2 border-t border-[#202938]">
+                  <button
+                    onClick={() => handleGatedFeatureClick('/ai-coach', 'AI Coach')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>🤖 AI Personal Coach</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <Link
+                    href="/nutrition"
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>🥗 Nutrition Tracker</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </Link>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/calendar', 'Calendar')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>📅 Workout Calendar</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Portal 4: Community & Motivation */}
+              <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised space-y-4 hover:border-[#FF5500]/40 transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-2xl">
+                    👥
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-white font-heading">Community & Beats</h3>
+                    <p className="text-gray-400 text-xs">Social, Badges & Audio</p>
+                  </div>
+                </div>
+                <div className="space-y-2 pt-2 border-t border-[#202938]">
+                  <button
+                    onClick={() => handleGatedFeatureClick('/social', 'Social Feed')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>👥 Social Feed</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/achievements', 'Achievements')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>🏆 Badges & Level XP</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/music', 'Workout Music')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-gray-200 transition"
+                  >
+                    <span>🎵 Workout Music Player</span>
+                    <span className="text-[#FF5500]">→</span>
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          {/* Featured Workout Programs */}
-          <div className="bg-gray-900/40 p-6 rounded-2xl border border-gray-800">
-            <div className="flex justify-between items-center mb-6">
+          {/* Featured Workout Programs Section */}
+          <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
               <div>
-                <h2 className="text-xl font-bold">📋 Featured Workout Templates</h2>
-                <p className="text-gray-400 text-xs">Science-backed training programs for all levels</p>
+                <h2 className="text-2xl font-black text-white font-heading">📋 FEATURED TRAINING PROGRAMS</h2>
+                <p className="text-gray-400 text-xs">Proven progressive overload routines for hypertrophy & power</p>
               </div>
               <Link
                 href="/plans"
-                className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
+                className="text-[#FF5500] hover:text-[#E04B00] text-xs font-black uppercase tracking-wider font-heading transition"
               >
-                Browse All Plans →
+                View All Plans →
               </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {workoutPlans.length > 0 ? (
-                workoutPlans.slice(0, 3).map((plan: any, idx: number) => (
-                  <div key={plan._id || idx} className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/60 flex flex-col justify-between">
+                workoutPlans.slice(0, 3).map((plan) => (
+                  <div key={plan.id} className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938] neu-inset flex flex-col justify-between space-y-4">
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-white text-base">{plan.title || plan.name}</h3>
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase font-semibold">
-                          {plan.category || plan.difficulty || 'All Levels'}
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-extrabold uppercase font-heading px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500]">
+                          {plan.level || 'Intermediate'}
                         </span>
+                        <span className="text-gray-500 text-xs">{plan.duration || '8 Weeks'}</span>
                       </div>
-                      <p className="text-gray-400 text-xs mb-4 line-clamp-2">{plan.description || 'Structured workout routine designed for strength & hypertrophy.'}</p>
+                      <h3 className="font-bold text-white text-base font-heading mb-1">{plan.name}</h3>
+                      <p className="text-gray-400 text-xs line-clamp-2">{plan.description}</p>
                     </div>
                     <Link
-                      href={`/workout-plan/${plan._id}`}
-                      className="w-full text-center py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs font-semibold rounded-lg transition"
+                      href={`/workout-plan/${plan.id}`}
+                      className="w-full py-2 bg-[#18202C] hover:bg-[#202938] text-white text-center text-xs font-bold rounded-xl border border-[#202938] transition block"
                     >
-                      View Template Details
+                      View Routine Details
                     </Link>
                   </div>
                 ))
               ) : (
-                <div className="col-span-3 text-center py-8 text-gray-500 text-sm">
-                  No public templates loaded. Visit <Link href="/plans" className="text-blue-400 underline">Plans Page</Link> to view routines.
-                </div>
+                [
+                  { title: 'Push Pull Legs Overload', level: 'Intermediate', duration: '10 Weeks', desc: 'Complete hypertrophy split targeting all muscle groups twice weekly.' },
+                  { title: '5x5 Strength Foundation', level: 'Beginner', duration: '6 Weeks', desc: 'Focus on core compound lifts: Squat, Bench Press, Deadlift & Overhead Press.' },
+                  { title: 'Advanced Powerlifting Cycle', level: 'Advanced', duration: '12 Weeks', desc: 'Periodized peaking routine for maximum 1RM strength output.' }
+                ].map((plan, i) => (
+                  <div key={i} className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938] neu-inset flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-extrabold uppercase font-heading px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500]">
+                          {plan.level}
+                        </span>
+                        <span className="text-gray-500 text-xs">{plan.duration}</span>
+                      </div>
+                      <h3 className="font-bold text-white text-base font-heading mb-1">{plan.title}</h3>
+                      <p className="text-gray-400 text-xs">{plan.desc}</p>
+                    </div>
+                    <Link
+                      href="/plans"
+                      className="w-full py-2 bg-[#18202C] hover:bg-[#202938] text-white text-center text-xs font-bold rounded-xl border border-[#202938] transition block"
+                    >
+                      View Routine Details
+                    </Link>
+                  </div>
+                ))
               )}
             </div>
           </div>
-        </main>
 
-        {/* Soft-Gate Auth Modal */}
-        <AuthModal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          title={authConfig.title}
-          description={authConfig.description}
-          nextUrl={authConfig.nextUrl}
-        />
+        </main>
       </div>
+
+      {/* Auth Gating Modal */}
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </ErrorBoundary>
   );
 }

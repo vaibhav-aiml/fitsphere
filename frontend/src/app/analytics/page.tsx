@@ -103,210 +103,164 @@ export default function AdvancedAnalytics() {
     await fetchOneRM('', exercise);
   };
 
-  const COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+  const CHART_COLORS = ['#FF5500', '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4'];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading analytics...</div>
+      <div className="min-h-screen bg-[#090C10] flex items-center justify-center">
+        <div className="text-[#FF5500] font-black font-heading text-xl">Loading Performance Analytics...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] p-4 sm:p-6 md:p-8 font-sans">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <button
-              onClick={() => router.back()}
-              className="text-blue-500 hover:text-blue-400 transition mb-2 block"
+              onClick={() => router.push('/')}
+              className="text-[#FF5500] hover:text-[#E04B00] text-xs font-bold font-heading uppercase tracking-wider transition mb-2 block focus-visible:ring-2 focus-visible:ring-[#FF5500]"
             >
               ← Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-white">📊 Advanced Analytics</h1>
-            <p className="text-gray-400 mt-1">Deep insights into your fitness journey</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight">
+              📊 PERFORMANCE ANALYTICS
+            </h1>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">
+              Data-driven insights for 1RM strength curves, daily volume, and energy expenditure
+            </p>
           </div>
+
           <Link href="/progress">
-            <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
-              Simple Progress →
+            <button className="px-5 py-3 bg-[#18202C] hover:bg-[#202938] text-white text-xs font-extrabold font-heading uppercase rounded-xl border border-[#202938] neu-raised transition">
+              Simple Progress View →
             </button>
           </Link>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-6 rounded-xl border border-blue-700">
-            <p className="text-gray-400 text-sm">Total Workouts</p>
-            <p className="text-white text-3xl font-bold mt-1">{analytics?.summary?.totalWorkouts || 0}</p>
+        {/* Bento Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-[#FF5500] text-[10px] font-black uppercase tracking-wider font-heading">Total Sessions</span>
+            <p className="text-3xl font-black text-white font-heading mt-2">{analytics?.summary?.totalWorkouts || 0}</p>
+            <p className="text-gray-500 text-xs mt-1">Completed workouts</p>
           </div>
-          <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-6 rounded-xl border border-green-700">
-            <p className="text-gray-400 text-sm">Total Volume (kg)</p>
-            <p className="text-white text-3xl font-bold mt-1">{(analytics?.totalVolume || 0).toLocaleString()}</p>
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-[#FF5500] text-[10px] font-black uppercase tracking-wider font-heading">Total Tonnage</span>
+            <p className="text-3xl font-black text-white font-heading mt-2">{(analytics?.totalVolume || 0).toLocaleString()} KG</p>
+            <p className="text-gray-500 text-xs mt-1">Cumulative load</p>
           </div>
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-6 rounded-xl border border-purple-700">
-            <p className="text-gray-400 text-sm">Unique Exercises</p>
-            <p className="text-white text-3xl font-bold mt-1">{analytics?.summary?.uniqueExercises || 0}</p>
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-[#FF5500] text-[10px] font-black uppercase tracking-wider font-heading">Unique Movements</span>
+            <p className="text-3xl font-black text-white font-heading mt-2">{analytics?.summary?.uniqueExercises || 0}</p>
+            <p className="text-gray-500 text-xs mt-1">Movement variation</p>
           </div>
-          <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 p-6 rounded-xl border border-orange-700">
-            <p className="text-gray-400 text-sm">Est. Calories</p>
-            <p className="text-white text-3xl font-bold mt-1">
-              {analytics?.caloriesData?.reduce((sum: number, d: any) => sum + d.calories, 0) || 0}
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-emerald-400 text-[10px] font-black uppercase tracking-wider font-heading">Est. Energy Burn</span>
+            <p className="text-3xl font-black text-white font-heading mt-2">
+              {analytics?.caloriesData?.reduce((sum: number, d: any) => sum + d.calories, 0) || 0} KCAL
             </p>
+            <p className="text-gray-500 text-xs mt-1">Calculated expenditure</p>
           </div>
         </div>
 
-        {/* Best Lifts Section */}
-        {analytics?.summary?.bestLifts && Object.keys(analytics.summary.bestLifts).length > 0 && (
-          <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4">🏆 Personal Records (1RM)</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(analytics.summary.bestLifts).slice(0, 8).map(([exercise, value]) => (
-                <div key={exercise} className="bg-gray-700/50 p-3 rounded-lg">
-                  <p className="text-gray-400 text-sm">{exercise}</p>
-                  <p className="text-white text-xl font-bold">{value as number} kg</p>
-                </div>
-              ))}
+        {/* 1RM Progression Bento Card */}
+        <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+            <div>
+              <h2 className="text-xl font-black text-white font-heading">📈 1RM STRENGTH PROGRESSION</h2>
+              <p className="text-gray-400 text-xs">Calculated 1-Rep Max curve across training logs</p>
             </div>
-          </div>
-        )}
-
-        {/* 1RM Progression Chart */}
-        <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">📈 1RM Progression</h2>
-          {exercises.length > 0 ? (
-            <>
-              <div className="mb-4">
-                <label className="text-gray-300 mr-3">Select Exercise:</label>
+            {exercises.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400 text-xs font-bold">Movement:</span>
                 <select
                   value={selectedExercise}
                   onChange={(e) => handleExerciseChange(e.target.value)}
-                  className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                  className="px-3 py-2 bg-[#0D1117] text-white font-bold text-xs rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500]"
                 >
                   {exercises.map(ex => (
                     <option key={ex} value={ex}>{ex}</option>
                   ))}
                 </select>
               </div>
-              {oneRMProgression.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={oneRMProgression}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9ca3af" />
-                    <YAxis stroke="#9ca3af" />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                      labelStyle={{ color: 'white' }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="oneRM" stroke="#3b82f6" name="1RM (kg)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="weight" stroke="#22c55e" name="Weight (kg)" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <p className="text-gray-400 text-center py-8">Log more workouts of this exercise to see progression!</p>
-              )}
-            </>
-          ) : (
-            <p className="text-gray-400 text-center py-8">No exercise data yet. Log workouts to see your 1RM progression!</p>
-          )}
-        </div>
-
-        {/* Volume Tracking Chart */}
-        <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">📊 Volume Tracking (Total Weight Lifted)</h2>
-          {analytics?.volumeData && analytics.volumeData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={analytics.volumeData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" stroke="#9ca3af" />
-                <YAxis stroke="#9ca3af" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                  labelStyle={{ color: 'white' }}
-                  formatter={(value: any) => `${value.toLocaleString()} kg`}
-                />
-                <Area type="monotone" dataKey="volume" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-gray-400 text-center py-8">No volume data yet. Log workouts to see your progress!</p>
-          )}
-        </div>
-
-        {/* Calories Burned Chart */}
-        <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">🔥 Estimated Calories Burned</h2>
-          {analytics?.caloriesData && analytics.caloriesData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.caloriesData.slice(-14)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" stroke="#9ca3af" />
-                <YAxis stroke="#9ca3af" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                  labelStyle={{ color: 'white' }}
-                />
-                <Bar dataKey="calories" fill="#f59e0b" name="Calories Burned" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-gray-400 text-center py-8">Log workouts to see calories burned estimates!</p>
-          )}
-        </div>
-
-        {/* Exercise Distribution */}
-        {analytics?.caloriesData && analytics.caloriesData.length > 0 && (
-          <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4">🎯 Exercise Distribution</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={Object.entries(
-                    analytics.caloriesData.reduce((acc: any, curr: any) => {
-                      acc[curr.exerciseName] = (acc[curr.exerciseName] || 0) + curr.calories;
-                      return acc;
-                    }, {})
-                  ).map(([name, value]) => ({ name, value }))}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {Object.entries(
-                    analytics.caloriesData.reduce((acc: any, curr: any) => {
-                      acc[curr.exerciseName] = (acc[curr.exerciseName] || 0) + curr.calories;
-                      return acc;
-                    }, {})
-                  ).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                  labelStyle={{ color: 'white' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            )}
           </div>
-        )}
 
-        {/* Quick Tips */}
-        <div className="bg-blue-900/30 p-6 rounded-xl border border-blue-700">
-          <h3 className="text-xl font-bold text-white mb-3">💡 Analytics Insights</h3>
-          <ul className="space-y-2 text-gray-300">
-            <li>✓ Track your 1RM progression to see strength gains over time</li>
-            <li>✓ Volume tracking shows your total work capacity improvement</li>
-            <li>✓ Log consistently to get accurate calorie burn estimates</li>
-            <li>✓ Use the exercise filter to focus on specific lifts</li>
-            <li>✓ Compare your progress month over month</li>
-          </ul>
+          {oneRMProgression.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={oneRMProgression}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#202938" />
+                <XAxis dataKey="date" stroke="#9CA3AF" tick={{ fontSize: 12 }} />
+                <YAxis stroke="#9CA3AF" tick={{ fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#11161F', border: '1px solid #202938', borderRadius: '12px' }}
+                  labelStyle={{ color: '#F9FAFB', fontWeight: 'bold' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="oneRM" stroke="#FF5500" name="1RM (kg)" strokeWidth={3} dot={{ fill: '#FF5500', r: 5 }} />
+                <Line type="monotone" dataKey="weight" stroke="#10B981" name="Working Load (kg)" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-gray-500 text-center py-12 text-sm italic">Log more workouts of this exercise to see strength curves.</p>
+          )}
         </div>
+
+        {/* Volume & Energy Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Volume Area Chart */}
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <h2 className="text-lg font-black text-white font-heading mb-4">📊 VOLUME TONNAGE TRACKING</h2>
+            {analytics?.volumeData && analytics.volumeData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={analytics.volumeData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#202938" />
+                  <XAxis dataKey="date" stroke="#9CA3AF" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#9CA3AF" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#11161F', border: '1px solid #202938', borderRadius: '12px' }}
+                    formatter={(val: any) => `${val.toLocaleString()} kg`}
+                  />
+                  <Area type="monotone" dataKey="volume" stroke="#FF5500" fill="#FF5500" fillOpacity={0.25} strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500 text-center py-12 text-xs italic">No volume history recorded yet.</p>
+            )}
+          </div>
+
+          {/* Calories Bar Chart */}
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <h2 className="text-lg font-black text-white font-heading mb-4">🔥 DAILY CALORIC EXPENDITURE</h2>
+            {analytics?.caloriesData && analytics.caloriesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={analytics.caloriesData.slice(-14)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#202938" />
+                  <XAxis dataKey="date" stroke="#9CA3AF" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#9CA3AF" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#11161F', border: '1px solid #202938', borderRadius: '12px' }}
+                  />
+                  <Bar dataKey="calories" fill="#FF5500" radius={[6, 6, 0, 0]} name="Calories Burned" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500 text-center py-12 text-xs italic">Log workouts to calculate caloric estimates.</p>
+            )}
+          </div>
+
+        </div>
+
       </div>
+
       <AuthModal
         isOpen={modalOpen}
         onClose={closeModal}

@@ -115,94 +115,97 @@ export default function WorkoutLogger() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] p-4 sm:p-6 md:p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <button
-              onClick={() => router.back()}
-              className="text-blue-500 hover:text-blue-400 transition mb-2 block"
+              onClick={() => router.push('/')}
+              className="text-[#FF5500] hover:text-[#E04B00] text-xs font-bold font-heading uppercase tracking-wider transition mb-2 block focus-visible:ring-2 focus-visible:ring-[#FF5500]"
             >
-              ← Back
+              ← Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-white">💪 Workout Logger</h1>
-            <p className="text-gray-400 mt-1">Log your exercises and track your progress</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight">
+              🏋️‍♂️ LIVE WORKOUT LOGGER
+            </h1>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">
+              Record active working sets, load percentages, and progressive overload benchmarks
+            </p>
           </div>
+
           <div className="flex gap-3">
             <button
               onClick={handleShareWorkout}
-              className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition"
+              className="px-4 py-2.5 bg-[#18202C] hover:bg-[#202938] text-white text-xs font-bold font-heading uppercase rounded-xl border border-[#202938] neu-raised transition"
             >
-              📱 Share Workout
+              📱 Share Summary
             </button>
             <button
               onClick={() => router.push('/progress')}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              className="px-4 py-2.5 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold font-heading uppercase rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
             >
-              View Progress
+              View Progress →
             </button>
           </div>
         </div>
 
         {/* Current Workout Summary */}
         {currentWorkout.length > 0 && (
-          <div className="bg-blue-900/30 p-6 rounded-xl border border-blue-700 mb-8">
-            <h2 className="text-xl font-bold text-white mb-3">Current Workout</h2>
-            <div className="space-y-2 mb-4">
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#FF5500]/40 neu-raised space-y-4">
+            <h2 className="text-xl font-black text-white font-heading">ACTIVE SESSION SUMMARY</h2>
+            <div className="space-y-2">
               {currentWorkout.map((exercise, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-gray-800/50 p-3 rounded-lg">
+                <div key={idx} className="flex justify-between items-center bg-[#0D1117] p-4 rounded-2xl border border-[#202938]">
                   <div>
-                    <p className="text-white font-semibold">{exercise.exerciseName}</p>
-                    <p className="text-gray-400 text-sm">
-                      {exercise.sets} sets × {exercise.reps} reps @ {exercise.weight} kg
-                    </p>
+                    <span className="text-white font-bold font-heading block">{exercise.exerciseName}</span>
+                    <span className="text-gray-400 text-xs">
+                      {exercise.sets} Sets × {exercise.reps} Reps @ <span className="text-[#FF5500] font-bold">{exercise.weight} KG</span>
+                    </span>
                   </div>
                   <button
                     onClick={() => removeExercise(idx)}
-                    className="text-red-500 hover:text-red-400 text-sm"
+                    className="text-red-400 hover:text-red-300 text-xs font-bold"
                   >
                     Remove
                   </button>
                 </div>
               ))}
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={handleFinishWorkout}
-                className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold font-heading uppercase py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.3)]"
               >
-                Finish Workout ({currentWorkout.length} exercises)
-              </button>
-              <button
-                onClick={handleShareWorkout}
-                className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition font-semibold"
-              >
-                📱 Share
+                Complete Workout ({currentWorkout.length} Movements)
               </button>
             </div>
           </div>
         )}
 
-        {/* Add Exercise Form */}
+        {/* Add Exercise Form View */}
         {!showAddExercise ? (
           <button
             onClick={() => setShowAddExercise(true)}
-            className="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition font-semibold text-lg"
+            className="w-full bg-[#FF5500] hover:bg-[#E04B00] text-white py-4 rounded-3xl font-black font-heading text-lg tracking-wider uppercase transition shadow-[0_0_20px_rgba(255,85,0,0.35)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
           >
-            + Add Exercise to Workout
+            + Add Exercise Movement
           </button>
         ) : (
-          <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">Add Exercise</h2>
+          <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised space-y-6">
+            <h2 className="text-2xl font-black text-white font-heading">ADD MOVEMENT TO SESSION</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-300 mb-2">Exercise Name *</label>
+                <label className="block text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">
+                  Exercise Name *
+                </label>
                 <input
                   type="text"
                   list="exercises"
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
-                  placeholder="e.g., Bench Press, Squat, Deadlift"
+                  className="w-full px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
+                  placeholder="e.g., Barbell Bench Press, Incline Dumbbell Press"
                   value={formData.exerciseName}
                   onChange={(e) => setFormData({...formData, exerciseName: e.target.value})}
                 />
@@ -216,16 +219,17 @@ export default function WorkoutLogger() {
                   <option value="Overhead Press" />
                   <option value="Barbell Row" />
                   <option value="Pull Up" />
-                  <option value="Leg Press" />
                 </datalist>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-gray-300 mb-2">Weight (kg) *</label>
+                  <label className="block text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">
+                    Weight (kg) *
+                  </label>
                   <input
                     type="number"
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    className="w-full px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
                     placeholder="60"
                     value={formData.weight}
                     onChange={(e) => {
@@ -237,10 +241,12 @@ export default function WorkoutLogger() {
                 </div>
                 
                 <div>
-                  <label className="block text-gray-300 mb-2">Reps *</label>
+                  <label className="block text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">
+                    Reps *
+                  </label>
                   <input
                     type="number"
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    className="w-full px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
                     placeholder="10"
                     value={formData.reps}
                     onChange={(e) => {
@@ -252,10 +258,12 @@ export default function WorkoutLogger() {
                 </div>
                 
                 <div>
-                  <label className="block text-gray-300 mb-2">Sets *</label>
+                  <label className="block text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">
+                    Sets *
+                  </label>
                   <input
                     type="number"
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    className="w-full px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
                     placeholder="3"
                     value={formData.sets}
                     onChange={(e) => setFormData({...formData, sets: e.target.value})}
@@ -264,30 +272,34 @@ export default function WorkoutLogger() {
               </div>
 
               {oneRepMax && (
-                <div className="bg-green-900/30 p-4 rounded-lg border border-green-700">
-                  <p className="text-green-400 text-sm">Estimated 1 Rep Max (1RM)</p>
-                  <p className="text-white text-2xl font-bold">{oneRepMax} kg</p>
-                  <p className="text-gray-400 text-xs mt-1">Based on Epley formula</p>
+                <div className="bg-[#18202C] p-4 rounded-2xl border border-[#FF5500]/30 neu-raised flex items-center justify-between">
+                  <div>
+                    <span className="text-[#FF5500] text-[10px] font-black uppercase font-heading">Estimated 1RM</span>
+                    <p className="text-white text-2xl font-black font-heading">{oneRepMax} KG</p>
+                  </div>
+                  <span className="text-gray-500 text-[10px]">Epley Benchmark</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-gray-300 mb-2">Notes (optional)</label>
+                <label className="block text-gray-400 text-xs font-black uppercase font-heading tracking-wider mb-2">
+                  Session Notes (Optional)
+                </label>
                 <textarea
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                  className="w-full px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500] text-sm"
                   rows={2}
-                  placeholder="Form notes, difficulty, etc."
+                  placeholder="RPE 8, smooth bar path, clean form..."
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={handleAddExercise}
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  className="flex-1 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold font-heading uppercase py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(255,85,0,0.3)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
                 >
-                  Add to Workout
+                  Save Movement
                 </button>
                 <button
                   onClick={() => {
@@ -295,7 +307,7 @@ export default function WorkoutLogger() {
                     setFormData({ exerciseName: '', weight: '', reps: '', sets: '', notes: '' });
                     setOneRepMax(null);
                   }}
-                  className="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition"
+                  className="flex-1 bg-[#18202C] hover:bg-[#202938] text-gray-300 text-xs font-bold font-heading uppercase py-3.5 rounded-xl border border-[#202938] neu-raised transition"
                 >
                   Cancel
                 </button>
@@ -304,18 +316,8 @@ export default function WorkoutLogger() {
           </div>
         )}
 
-        {/* Quick Tips */}
-        <div className="mt-8 bg-gray-800/30 p-6 rounded-xl border border-gray-700">
-          <h3 className="text-lg font-bold text-white mb-3">💡 Tips for Logging Workouts</h3>
-          <ul className="space-y-2 text-gray-400 text-sm">
-            <li>✓ Log your working sets (not warm-up sets)</li>
-            <li>✓ Be consistent with exercise names for accurate tracking</li>
-            <li>✓ Add notes for form corrections or difficulty level</li>
-            <li>✓ Track your 1RM to monitor strength gains</li>
-            <li>✓ Share your achievements to stay motivated! 📱</li>
-          </ul>
-        </div>
       </div>
+
       <AuthModal
         isOpen={modalOpen}
         onClose={closeModal}

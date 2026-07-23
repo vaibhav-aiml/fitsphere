@@ -23,45 +23,45 @@ export default function AuthModal({
   const encodedNext = encodeURIComponent(nextUrl);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#11161F] border border-[#202938] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative neu-raised">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#18202C] text-gray-400 hover:text-white flex items-center justify-center border border-[#202938] transition focus-visible:ring-2 focus-visible:ring-[#FF5500]"
           aria-label="Close modal"
         >
           ✕
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-blue-500/30">
-            🔒
+          <div className="w-16 h-16 bg-[#FF5500]/15 text-[#FF5500] rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-[#FF5500]/30 shadow-[0_0_20px_rgba(255,85,0,0.2)]">
+            ⚡
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+          <h2 className="text-2xl font-black text-white font-heading mb-2">{title}</h2>
           <p className="text-gray-400 text-sm">{description}</p>
         </div>
 
         <div className="space-y-3">
           <Link
             href={`/auth/login?next=${encodedNext}`}
-            className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/25"
+            className="block w-full text-center bg-[#FF5500] hover:bg-[#E04B00] text-white font-extrabold py-3.5 rounded-xl transition shadow-[0_0_20px_rgba(255,85,0,0.35)] focus-visible:ring-2 focus-visible:ring-[#FF5500]"
           >
             Sign In to Continue
           </Link>
           <Link
             href={`/auth/signup?next=${encodedNext}`}
-            className="block w-full text-center bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl border border-gray-700 transition"
+            className="block w-full text-center bg-[#18202C] hover:bg-[#202938] text-white font-bold py-3.5 rounded-xl border border-[#202938] neu-raised transition focus-visible:ring-2 focus-visible:ring-[#FF5500]"
           >
             Create Free Account
           </Link>
         </div>
 
-        <div className="mt-5 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={onClose}
-            className="text-xs text-gray-500 hover:text-gray-400 transition"
+            className="text-xs font-semibold text-gray-500 hover:text-gray-300 transition focus-visible:ring-2 focus-visible:ring-[#FF5500]"
           >
-            Continue as Guest (Read-Only)
+            Continue Browsing as Guest (Read-Only)
           </button>
         </div>
       </div>

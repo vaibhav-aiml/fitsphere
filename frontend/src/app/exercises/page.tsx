@@ -491,6 +491,10 @@ export default function ExerciseLibrary() {
   const muscleGroups = ['all', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'];
   const difficulties = ['all', 'Beginner', 'Intermediate', 'Advanced'];
 
+  const muscleIcons: Record<string, string> = {
+    'all': '📋', 'Chest': '🫁', 'Back': '🔙', 'Legs': '🦵', 'Shoulders': '💪', 'Arms': '💪', 'Core': '🎯'
+  };
+
   const filteredExercises = exercises.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMuscle = selectedMuscle === 'all' || exercise.muscleGroup === selectedMuscle;
@@ -498,95 +502,131 @@ export default function ExerciseLibrary() {
     return matchesSearch && matchesMuscle && matchesDifficulty;
   });
 
+  const getDifficultyColor = (d: string) => {
+    if (d === 'Beginner') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (d === 'Intermediate') return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    return 'text-red-400 bg-red-500/10 border-red-500/20';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <button
-              onClick={() => router.back()}
-              className="text-blue-500 hover:text-blue-400 transition mb-2 block"
-            >
-              ← Back to Dashboard
-            </button>
-            <h1 className="text-3xl font-bold text-white">🏋️ Exercise Library</h1>
-            <p className="text-gray-400 mt-1">{exercises.length} exercises with video demonstrations</p>
-          </div>
+    <div className="min-h-screen bg-[#090C10]">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="text-[#FF5500] hover:text-[#ff7733] transition mb-3 block font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] rounded"
+          >
+            ← Back
+          </button>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-white tracking-tight">
+            Exercise Library
+          </h1>
+          <p className="text-gray-500 mt-1 font-sans text-sm">
+            {exercises.length} exercises with video demonstrations
+          </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        {/* Muscle Group Pill Filters */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {muscleGroups.map(muscle => (
+            <button
+              key={muscle}
+              onClick={() => setSelectedMuscle(muscle)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] ${
+                selectedMuscle === muscle
+                  ? 'bg-[#FF5500] text-white border-[#FF5500] shadow-[0_0_16px_rgba(255,85,0,0.3)]'
+                  : 'bg-[#11161F] text-gray-400 border-[#1E2A3A] hover:border-[#FF5500]/40 hover:text-gray-200'
+              }`}
+            >
+              {muscle === 'all' ? 'All Groups' : muscle}
+            </button>
+          ))}
+        </div>
+
+        {/* Search & Difficulty Filter Bar */}
+        <div className="bg-[#11161F] p-4 rounded-xl border border-[#1E2A3A] mb-8 flex flex-col sm:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input
               type="text"
-              placeholder="🔍 Search exercises..."
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="Search exercises..."
+              className="w-full pl-10 pr-4 py-2.5 bg-[#0D1117] text-white rounded-lg border border-[#1E2A3A] focus:outline-none focus:ring-2 focus:ring-[#FF5500] focus:border-transparent text-sm font-sans placeholder-gray-600"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <select
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              value={selectedMuscle}
-              onChange={(e) => setSelectedMuscle(e.target.value)}
-            >
-              {muscleGroups.map(muscle => (
-                <option key={muscle} value={muscle}>
-                  {muscle === 'all' ? '📋 All Muscle Groups' : `💪 ${muscle}`}
-                </option>
-              ))}
-            </select>
-            <select
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-            >
-              {difficulties.map(diff => (
-                <option key={diff} value={diff}>
-                  {diff === 'all' ? '⭐ All Difficulties' : diff === 'Beginner' ? '🌱 Beginner' : diff === 'Intermediate' ? '📈 Intermediate' : '🚀 Advanced'}
-                </option>
-              ))}
-            </select>
           </div>
-          <p className="text-gray-400 text-sm">📊 Found {filteredExercises.length} exercises</p>
+          <select
+            className="px-4 py-2.5 bg-[#0D1117] text-gray-300 rounded-lg border border-[#1E2A3A] focus:outline-none focus:ring-2 focus:ring-[#FF5500] text-sm font-sans w-full sm:w-auto"
+            value={selectedDifficulty}
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
+          >
+            {difficulties.map(diff => (
+              <option key={diff} value={diff}>
+                {diff === 'all' ? 'All Levels' : diff}
+              </option>
+            ))}
+          </select>
+          <span className="text-gray-500 text-xs font-sans whitespace-nowrap">
+            {filteredExercises.length} found
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Exercise List */}
-          <div className="lg:col-span-1 space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            <h2 className="text-xl font-bold text-white mb-4 sticky top-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 py-2">📋 Exercise List</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Exercise List — scrollable sidebar */}
+          <div className="lg:col-span-1 space-y-2 max-h-[700px] overflow-y-auto pr-2 exercise-scrollbar">
             {filteredExercises.map(exercise => (
               <button
                 key={exercise.id}
                 onClick={() => setSelectedExercise(exercise)}
-                className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${
+                className={`w-full text-left p-4 rounded-xl transition-all duration-200 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] ${
                   selectedExercise?.id === exercise.id
-                    ? 'bg-blue-600 border-blue-500 shadow-lg scale-[1.02]'
-                    : 'bg-gray-800/50 border-gray-700 hover:bg-gray-700 hover:scale-[1.01]'
-                } border`}
+                    ? 'bg-[#18202C] border-[#FF5500]/60 shadow-[0_0_20px_rgba(255,85,0,0.1)]'
+                    : 'bg-[#11161F] border-[#1E2A3A] hover:border-[#2A3544] hover:bg-[#151D29]'
+                }`}
               >
-                <p className="text-white font-semibold">{exercise.name}</p>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  <span className="text-xs text-gray-400">{exercise.muscleGroup}</span>
-                  <span className="text-xs text-gray-500">•</span>
-                  <span className="text-xs text-gray-400">{exercise.equipment}</span>
-                  <span className="text-xs text-gray-500">•</span>
-                  <span className={`text-xs ${
-                    exercise.difficulty === 'Beginner' ? 'text-green-400' :
-                    exercise.difficulty === 'Intermediate' ? 'text-yellow-400' : 'text-red-400'
-                  }`}>{exercise.difficulty}</span>
+                <div className="flex items-center justify-between">
+                  <p className={`font-heading font-semibold text-sm ${selectedExercise?.id === exercise.id ? 'text-[#FF5500]' : 'text-white'}`}>
+                    {exercise.name}
+                  </p>
+                  {selectedExercise?.id === exercise.id && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF5500]" />
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[11px] text-gray-500 font-sans">{exercise.muscleGroup}</span>
+                  <span className="text-[11px] text-gray-700">•</span>
+                  <span className="text-[11px] text-gray-500 font-sans">{exercise.equipment}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded border font-sans ml-auto ${getDifficultyColor(exercise.difficulty)}`}>
+                    {exercise.difficulty}
+                  </span>
                 </div>
               </button>
             ))}
           </div>
 
-          {/* Exercise Details */}
+          {/* Exercise Detail Panel */}
           <div className="lg:col-span-2">
             {selectedExercise ? (
               <div className="space-y-6 animate-fadeIn">
-                <h2 className="text-2xl font-bold text-white">{selectedExercise.name}</h2>
-                
-                {/* Video Demo */}
-                <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-xl">
+                {/* Title & Meta */}
+                <div>
+                  <h2 className="text-2xl font-heading font-bold text-white">{selectedExercise.name}</h2>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-xs text-gray-400 bg-[#11161F] px-3 py-1 rounded-full border border-[#1E2A3A] font-sans">
+                      {selectedExercise.muscleGroup}
+                    </span>
+                    <span className="text-xs text-gray-400 bg-[#11161F] px-3 py-1 rounded-full border border-[#1E2A3A] font-sans">
+                      {selectedExercise.equipment}
+                    </span>
+                    <span className={`text-xs px-3 py-1 rounded-full border font-sans ${getDifficultyColor(selectedExercise.difficulty)}`}>
+                      {selectedExercise.difficulty}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Video */}
+                <div className="aspect-video bg-black rounded-xl overflow-hidden border border-[#1E2A3A] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
                   <iframe
                     width="100%"
                     height="100%"
@@ -598,44 +638,52 @@ export default function ExerciseLibrary() {
                   ></iframe>
                 </div>
 
-                {/* Form Tips */}
-                <div className="bg-yellow-900/30 p-6 rounded-xl border border-yellow-700">
-                  <h3 className="text-xl font-bold text-yellow-400 mb-3">💡 Form Tips</h3>
-                  <ul className="space-y-2">
-                    {selectedExercise.tips.map((tip, idx) => (
-                      <li key={idx} className="text-gray-300 flex items-start gap-2">
-                        <span className="text-yellow-400">✓</span>
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
+                {/* Tips & Instructions in 2-col on lg */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Form Tips */}
+                  <div className="bg-[#11161F] p-5 rounded-xl border border-[#1E2A3A]">
+                    <h3 className="text-sm font-heading font-bold text-[#FF5500] mb-3 uppercase tracking-wider">Form Tips</h3>
+                    <ul className="space-y-2">
+                      {selectedExercise.tips.map((tip, idx) => (
+                        <li key={idx} className="text-gray-300 flex items-start gap-2 text-sm font-sans">
+                          <span className="text-[#FF5500] mt-0.5 text-xs">●</span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Step-by-Step */}
+                  <div className="bg-[#11161F] p-5 rounded-xl border border-[#1E2A3A]">
+                    <h3 className="text-sm font-heading font-bold text-white mb-3 uppercase tracking-wider">Instructions</h3>
+                    <ol className="space-y-2">
+                      {selectedExercise.instructions.map((instruction, idx) => (
+                        <li key={idx} className="text-gray-300 flex items-start gap-3 text-sm font-sans">
+                          <span className="text-[#FF5500] font-heading font-bold text-xs mt-0.5 w-4 shrink-0">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          {instruction}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 </div>
 
-                {/* Instructions */}
-                <div className="bg-blue-900/30 p-6 rounded-xl border border-blue-700">
-                  <h3 className="text-xl font-bold text-blue-400 mb-3">📝 Step-by-Step Instructions</h3>
-                  <ol className="space-y-2 list-decimal list-inside">
-                    {selectedExercise.instructions.map((instruction, idx) => (
-                      <li key={idx} className="text-gray-300">{instruction}</li>
-                    ))}
-                  </ol>
-                </div>
-
-                {/* Quick Action */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => router.push('/workout')}
-                    className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
-                  >
-                    💪 Log This Exercise Now
-                  </button>
-                </div>
+                {/* CTA */}
+                <button
+                  onClick={() => router.push('/workout')}
+                  className="w-full bg-[#FF5500] hover:bg-[#e64d00] text-white py-3 rounded-xl font-heading font-bold text-sm tracking-wide transition-all duration-200 shadow-[0_0_20px_rgba(255,85,0,0.25)] hover:shadow-[0_0_30px_rgba(255,85,0,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] focus-visible:ring-offset-2 focus-visible:ring-offset-[#090C10]"
+                >
+                  LOG THIS EXERCISE →
+                </button>
               </div>
             ) : (
-              <div className="bg-gray-800/50 p-12 rounded-xl text-center border border-gray-700">
-                <div className="text-6xl mb-4">🏋️</div>
-                <p className="text-gray-400 text-lg">Select an exercise from the list</p>
-                <p className="text-gray-500 text-sm mt-2">View video demonstrations, form tips, and instructions</p>
+              <div className="bg-[#11161F] p-16 rounded-xl text-center border border-[#1E2A3A] flex flex-col items-center justify-center min-h-[400px]">
+                <div className="w-20 h-20 rounded-full bg-[#0D1117] border border-[#1E2A3A] flex items-center justify-center mb-5">
+                  <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </div>
+                <p className="text-gray-400 font-heading font-semibold">Select an exercise</p>
+                <p className="text-gray-600 text-sm mt-1 font-sans">View video demos, form tips & instructions</p>
               </div>
             )}
           </div>
@@ -643,26 +691,31 @@ export default function ExerciseLibrary() {
       </div>
 
       <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
+        .exercise-scrollbar::-webkit-scrollbar {
+          width: 4px;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #1f2937;
+        .exercise-scrollbar::-webkit-scrollbar-track {
+          background: #090C10;
           border-radius: 10px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #3b82f6;
+        .exercise-scrollbar::-webkit-scrollbar-thumb {
+          background: #1E2A3A;
           border-radius: 10px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #2563eb;
+        .exercise-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #FF5500;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
+          animation: fadeIn 0.25s ease-out;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-fadeIn {
+            animation: none;
+          }
         }
       `}</style>
     </div>

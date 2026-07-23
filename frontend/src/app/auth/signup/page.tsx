@@ -41,78 +41,106 @@ function SignupFormContent() {
     }
   };
 
+  const goals = [
+    { value: 'bodybuilding', label: 'Bodybuilding' },
+    { value: 'powerlifting', label: 'Powerlifting' },
+    { value: 'weight-loss', label: 'Weight Loss' },
+    { value: 'general-fitness', label: 'General Fitness' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center py-12 px-4">
-      <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700">
-        <h1 className="text-3xl font-bold text-white mb-2 text-center">Create Account</h1>
-        <p className="text-gray-400 text-center mb-8">Join FitSphere and start your fitness journey</p>
-        
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Full Name</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
-              placeholder="John Doe"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              required
-            />
-          </div>
+    <div className="min-h-screen bg-[#090C10] flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Subtle ambient glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#FF5500]/5 rounded-full blur-[120px] pointer-events-none" />
 
-          <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
-              placeholder="john@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Password</label>
-            <input
-              type="password"
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-300 mb-2 text-sm font-medium">Primary Goal</label>
-            <select
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 border border-gray-600"
-              value={formData.goal}
-              onChange={(e) => setFormData({...formData, goal: e.target.value})}
-            >
-              <option value="bodybuilding">Bodybuilding</option>
-              <option value="powerlifting">Powerlifting</option>
-              <option value="weight-loss">Weight Loss</option>
-              <option value="general-fitness">General Fitness</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
-          >
-            {loading ? 'Creating Account...' : 'Sign Up'}
-          </button>
-        </form>
-
-        <p className="text-gray-400 text-center mt-6 text-sm">
-          Already have an account?{' '}
-          <Link href={`/auth/login?next=${encodeURIComponent(nextUrl)}`} className="text-blue-500 hover:text-blue-400 font-medium">
-            Sign In
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo / Brand */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] rounded">
+            <h2 className="font-heading text-2xl font-bold text-white tracking-tight">
+              Fit<span className="text-[#FF5500]">Sphere</span>
+            </h2>
           </Link>
-        </p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-[#11161F] p-8 rounded-2xl border border-[#1E2A3A] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+          <h1 className="text-2xl font-heading font-bold text-white mb-1">Create Account</h1>
+          <p className="text-gray-500 text-sm font-sans mb-7">Start your training journey</p>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-gray-400 mb-1.5 text-xs font-sans font-medium uppercase tracking-wider">Full Name</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2.5 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5500] border border-[#1E2A3A] text-sm font-sans placeholder-gray-600 transition"
+                placeholder="Your name"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1.5 text-xs font-sans font-medium uppercase tracking-wider">Email</label>
+              <input
+                type="email"
+                className="w-full px-4 py-2.5 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5500] border border-[#1E2A3A] text-sm font-sans placeholder-gray-600 transition"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1.5 text-xs font-sans font-medium uppercase tracking-wider">Password</label>
+              <input
+                type="password"
+                className="w-full px-4 py-2.5 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5500] border border-[#1E2A3A] text-sm font-sans placeholder-gray-600 transition"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1.5 text-xs font-sans font-medium uppercase tracking-wider">Primary Goal</label>
+              <div className="grid grid-cols-2 gap-2">
+                {goals.map(g => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setFormData({...formData, goal: g.value})}
+                    className={`px-3 py-2.5 rounded-lg text-sm font-sans transition-all duration-200 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] ${
+                      formData.goal === g.value
+                        ? 'bg-[#FF5500]/10 border-[#FF5500]/50 text-[#FF5500]'
+                        : 'bg-[#0D1117] border-[#1E2A3A] text-gray-400 hover:border-[#2A3544]'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#FF5500] text-white py-2.5 rounded-xl hover:bg-[#e64d00] transition-all duration-200 font-heading font-bold text-sm tracking-wide disabled:opacity-50 shadow-[0_0_20px_rgba(255,85,0,0.2)] hover:shadow-[0_0_30px_rgba(255,85,0,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] focus-visible:ring-offset-2 focus-visible:ring-offset-[#11161F] mt-2"
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+
+          <p className="text-gray-500 text-center mt-6 text-sm font-sans">
+            Already have an account?{' '}
+            <Link href={`/auth/login?next=${encodeURIComponent(nextUrl)}`} className="text-[#FF5500] hover:text-[#ff7733] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5500] rounded">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -121,7 +149,7 @@ function SignupFormContent() {
 export default function Signup() {
   return (
     <ErrorBoundary>
-      <Suspense fallback={<div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">Loading...</div>}>
+      <Suspense fallback={<div className="min-h-screen bg-[#090C10] text-white flex items-center justify-center font-sans">Loading...</div>}>
         <SignupFormContent />
       </Suspense>
     </ErrorBoundary>

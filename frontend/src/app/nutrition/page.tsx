@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import AuthModal from '@/components/AuthModal';
+import useRequireAuth from '@/hooks/useRequireAuth';
 
 interface Food {
   _id: string;
@@ -26,9 +28,6 @@ interface Meal {
   totalFats: number;
   date: string;
 }
-
-import AuthModal from '@/components/AuthModal';
-import useRequireAuth from '@/hooks/useRequireAuth';
 
 export default function NutritionTracker() {
   const router = useRouter();
@@ -158,97 +157,114 @@ export default function NutritionTracker() {
   const targetWater = 3000;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-[#090C10] text-[#F9FAFB] p-4 sm:p-6 md:p-8 font-sans">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <button onClick={() => router.back()} className="text-blue-500 hover:text-blue-400 transition mb-2 block">
+            <button
+              onClick={() => router.push('/')}
+              className="text-[#FF5500] hover:text-[#E04B00] text-xs font-bold font-heading uppercase tracking-wider transition mb-2 block focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+            >
               ← Back to Dashboard
             </button>
-            <h1 className="text-3xl font-bold text-white">🥗 Nutrition Tracker</h1>
-            <p className="text-gray-400 mt-1">Track meals, water, and supplements</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white font-heading tracking-tight">
+              🥗 NUTRITION & HYDRATION
+            </h1>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">
+              Track caloric intake, macronutrient distribution, hydration, and supplements
+            </p>
           </div>
-          <div className="flex gap-3">
+
+          <div className="flex items-center gap-3">
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+              className="px-3.5 py-2.5 bg-[#0D1117] text-white font-bold text-xs rounded-xl border border-[#202938] neu-inset focus-visible:ring-2 focus-visible:ring-[#FF5500]"
             />
           </div>
         </div>
 
-        {/* Daily Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 p-4 rounded-xl border border-orange-700">
-            <p className="text-gray-400 text-sm">Calories</p>
-            <p className="text-white text-2xl font-bold">{totals.calories} / {targetCalories}</p>
-            <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-              <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totals.calories / targetCalories) * 100)}%` }} />
+        {/* Macro & Hydration Bento Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-[#FF5500] text-[10px] font-black uppercase tracking-wider font-heading">Energy Intake</span>
+            <p className="text-2xl font-black text-white font-heading mt-2">{totals.calories} / {targetCalories} <span className="text-xs text-gray-400">KCAL</span></p>
+            <div className="w-full bg-[#0D1117] rounded-full h-2 mt-3 overflow-hidden neu-inset">
+              <div className="bg-[#FF5500] h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (totals.calories / targetCalories) * 100)}%` }} />
             </div>
           </div>
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 rounded-xl border border-blue-700">
-            <p className="text-gray-400 text-sm">Protein (g)</p>
-            <p className="text-white text-2xl font-bold">{totals.protein} / {targetProtein}</p>
-            <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-              <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totals.protein / targetProtein) * 100)}%` }} />
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-[#FF5500] text-[10px] font-black uppercase tracking-wider font-heading">Protein Target</span>
+            <p className="text-2xl font-black text-white font-heading mt-2">{totals.protein} / {targetProtein} <span className="text-xs text-gray-400">G</span></p>
+            <div className="w-full bg-[#0D1117] rounded-full h-2 mt-3 overflow-hidden neu-inset">
+              <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (totals.protein / targetProtein) * 100)}%` }} />
             </div>
           </div>
-          <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 rounded-xl border border-green-700">
-            <p className="text-gray-400 text-sm">Water (ml)</p>
-            <p className="text-white text-2xl font-bold">{waterIntake} / {targetWater}</p>
-            <button onClick={addWater} className="text-xs text-green-400 mt-1 hover:text-green-300">
-              + Add 250ml
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-emerald-400 text-[10px] font-black uppercase tracking-wider font-heading">Hydration</span>
+            <p className="text-2xl font-black text-white font-heading mt-2">{waterIntake} / {targetWater} <span className="text-xs text-gray-400">ML</span></p>
+            <button 
+              onClick={addWater} 
+              className="mt-2 text-xs font-extrabold text-[#FF5500] hover:underline focus-visible:ring-2 focus-visible:ring-[#FF5500]"
+            >
+              + Add 250ml Glass 💧
             </button>
           </div>
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 rounded-xl border border-purple-700">
-            <p className="text-gray-400 text-sm">Macros</p>
-            <p className="text-white text-sm mt-1">🥩 {totals.protein}g | 🍚 {totals.carbs}g | 🥑 {totals.fats}g</p>
+
+          <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+            <span className="text-gray-400 text-[10px] font-black uppercase tracking-wider font-heading">Macronutrient Ratio</span>
+            <div className="text-xs font-bold text-gray-300 space-y-1 mt-2">
+              <p>🥩 Protein: <span className="text-white">{totals.protein}g</span></p>
+              <p>🍚 Carbs: <span className="text-white">{totals.carbs}g</span></p>
+              <p>🥑 Fats: <span className="text-white">{totals.fats}g</span></p>
+            </div>
           </div>
+
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-700">
-          {['meals', 'grocery', 'supplements', 'recipes'].map(tab => (
+        {/* Tab Navigation Controls */}
+        <div className="flex gap-2 border-b border-[#202938] pb-1 overflow-x-auto">
+          {[
+            { id: 'meals', name: '🍽️ Meals & Logs' },
+            { id: 'grocery', name: '🛒 Grocery List' },
+            { id: 'supplements', name: '💊 Supplements' },
+            { id: 'recipes', name: '📖 Recipe Database' }
+          ].map(tab => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-t-lg transition ${
-                activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-5 py-3 rounded-t-2xl font-bold font-heading text-xs uppercase tracking-wider transition ${
+                activeTab === tab.id
+                  ? 'bg-[#11161F] text-white border-t border-x border-[#202938] border-b-transparent shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4)]'
+                  : 'text-gray-400 hover:text-white hover:bg-[#11161F]/50'
               }`}
             >
-              {tab === 'meals' && '🍽️ Meals'}
-              {tab === 'grocery' && '🛒 Grocery List'}
-              {tab === 'supplements' && '💊 Supplements'}
-              {tab === 'recipes' && '📖 Recipes'}
+              {tab.name}
             </button>
           ))}
         </div>
 
-        {/* Meals Tab */}
+        {/* Meals View */}
         {activeTab === 'meals' && (
-          <div>
-            <button
-              onClick={() => setShowAddMeal(true)}
-              className="mb-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-            >
-              + Log Meal
-            </button>
-            
-            <div className="space-y-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {['breakfast', 'lunch', 'dinner', 'snack'].map(mealType => {
                 const meal = meals.find(m => m.mealType === mealType);
                 return (
-                  <div key={mealType} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                    <h3 className="text-lg font-bold text-white capitalize mb-2">{mealType}</h3>
+                  <div key={mealType} className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">
+                    <h3 className="text-lg font-black text-white font-heading capitalize mb-2">{mealType}</h3>
                     {meal ? (
                       <div>
-                        <p className="text-gray-300">{meal.totalCalories} calories | {meal.totalProtein}g protein</p>
-                        <button className="text-blue-400 text-sm mt-2">View Details →</button>
+                        <p className="text-gray-300 text-sm font-semibold">{meal.totalCalories} kcal | {meal.totalProtein}g protein</p>
                       </div>
                     ) : (
-                      <p className="text-gray-500">No meal logged</p>
+                      <p className="text-gray-500 text-xs italic">No entries recorded for this meal.</p>
                     )}
                   </div>
                 );
@@ -257,80 +273,63 @@ export default function NutritionTracker() {
           </div>
         )}
 
-        {/* Grocery List Tab */}
+        {/* Grocery View */}
         {activeTab === 'grocery' && (
-          <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-            <div className="flex gap-2 mb-4">
+          <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised space-y-4">
+            <h2 className="text-xl font-black text-white font-heading">ATHLETIC GROCERY LIST</h2>
+            <div className="flex gap-3">
               <input
                 type="text"
                 value={newGroceryItem}
                 onChange={(e) => setNewGroceryItem(e.target.value)}
-                placeholder="Add item..."
-                className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600"
+                placeholder="Add item (e.g. Chicken Breast, Oats, Greek Yogurt)..."
+                className="flex-1 px-4 py-3 bg-[#0D1117] text-white rounded-xl border border-[#202938] neu-inset text-sm"
                 onKeyPress={(e) => e.key === 'Enter' && addToGrocery()}
               />
-              <button onClick={addToGrocery} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Add</button>
+              <button 
+                onClick={addToGrocery} 
+                className="px-6 py-3 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold font-heading uppercase rounded-xl transition"
+              >
+                Add Item
+              </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2">
               {groceryItems.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded-lg">
-                  <input type="checkbox" className="w-5 h-5" />
-                  <span className="text-white flex-1">{item.name}</span>
-                  <span className="text-gray-400 text-sm">{item.quantity}</span>
+                <div key={idx} className="flex items-center gap-3 p-3 bg-[#0D1117] rounded-xl border border-[#202938]">
+                  <input type="checkbox" className="w-4 h-4 accent-[#FF5500]" />
+                  <span className="text-white font-semibold text-sm flex-1">{item.name}</span>
+                  <span className="text-gray-500 text-xs">{item.quantity}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Supplements Tab */}
-        {activeTab === 'supplements' && (
-          <div>
-            <button
-              onClick={() => setShowAddSupplement(true)}
-              className="mb-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-            >
-              + Add Supplement Reminder
-            </button>
-            <div className="space-y-3">
-              {supplements.map(sup => (
-                <div key={sup._id} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-white font-bold">{sup.name}</h3>
-                      <p className="text-gray-400 text-sm">{sup.dosage} • {sup.timeOfDay} at {sup.time}</p>
-                    </div>
-                    <button className="text-green-500">✓ Take</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recipes Tab */}
+        {/* Recipes View */}
         {activeTab === 'recipes' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 text-center">
-              <div className="text-3xl mb-2">🍳</div>
-              <p className="text-gray-400">High Protein Breakfast Bowl</p>
-              <p className="text-gray-500 text-sm">450 cal • 35g protein</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised text-center space-y-2">
+              <div className="text-4xl mb-2">🍳</div>
+              <h3 className="text-white font-black font-heading text-lg">High-Protein Anabolic Bowl</h3>
+              <p className="text-gray-400 text-xs">450 kcal • 42g Protein • 35g Carbs</p>
             </div>
-            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 text-center">
-              <div className="text-3xl mb-2">🥗</div>
-              <p className="text-gray-400">Chicken Quinoa Salad</p>
-              <p className="text-gray-500 text-sm">550 cal • 45g protein</p>
+            <div className="bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised text-center space-y-2">
+              <div className="text-4xl mb-2">🥗</div>
+              <h3 className="text-white font-black font-heading text-lg">Grilled Chicken Quinoa Power Salad</h3>
+              <p className="text-gray-400 text-xs">520 kcal • 48g Protein • 40g Carbs</p>
             </div>
           </div>
         )}
-        <AuthModal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          title={authConfig.title}
-          description={authConfig.description}
-          nextUrl={authConfig.nextUrl}
-        />
+
       </div>
+
+      <AuthModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={authConfig.title}
+        description={authConfig.description}
+        nextUrl={authConfig.nextUrl}
+      />
     </div>
   );
 }
