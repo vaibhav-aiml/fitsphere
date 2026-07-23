@@ -121,6 +121,12 @@ export default function RootAppPage() {
   };
 
   const handleGatedFeatureClick = (targetHref: string, featureName: string) => {
+    // Guest-browsable features navigate directly without requiring an account gate
+    if (targetHref === '/plans' || targetHref === '/nutrition') {
+      router.push(targetHref);
+      return;
+    }
+
     if (isGuest) {
       requireAuth(() => router.push(targetHref), {
         title: `${featureName} Requires Account`,
@@ -243,11 +249,21 @@ export default function RootAppPage() {
                     <div className="text-3xl mb-3 group-hover:scale-110 transition duration-300">{item.icon}</div>
                     <h3 className="font-bold text-lg text-white mb-1 group-hover:text-blue-400 transition">{item.name}</h3>
                     <p className="text-gray-400 text-xs">
-                      {isGuest ? 'Click to explore feature' : 'Open feature tool'}
+                      {isGuest && (item.href === '/plans' || item.href === '/nutrition')
+                        ? 'Browse public database'
+                        : isGuest
+                        ? 'Requires free account'
+                        : 'Open feature tool'}
                     </p>
                   </div>
                   <div className="mt-4 flex items-center justify-between text-xs text-blue-400 font-semibold group-hover:translate-x-1 transition">
-                    <span>{isGuest ? 'Try Feature' : 'Launch'}</span>
+                    <span>
+                      {isGuest && (item.href === '/plans' || item.href === '/nutrition')
+                        ? 'Browse Now'
+                        : isGuest
+                        ? 'Sign In to Access'
+                        : 'Launch'}
+                    </span>
                     <span>→</span>
                   </div>
                 </div>
