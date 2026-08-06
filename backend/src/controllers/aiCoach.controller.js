@@ -1,23 +1,322 @@
-const WorkoutLog = require('../models/WorkoutLog');
+const pino = require('pino');
+const logger = pino();
 
+const WorkoutLog = require('../models/WorkoutLog');
+const ChatConversation = require('../models/ChatConversation');
+const ChatMessage = require('../models/ChatMessage');
+const aiProvider = require('../services/aiProvider');
+const aiConfig = require('../config/ai');
+const systemPrompt = require('../prompts/fitness.system');
+
+/**
+ * Helper to fetch sanitized user fitness context
+ */
+async function buildSanitizedUserContext(userId) {
+  const recentWorkouts = await WorkoutLog.find({ userId })
+    .sort({ date: -1 })
+    .limit(10)
+    .lean();
+
+  if (!recentWorkouts || recentWorkouts.length === 0) {
+    return 'No previous workout logs found.';
+  }
+
+  const summaries = recentWorkouts.map(w => {
+    return `- ${w.exerciseName}: ${w.weight}kg x ${w.reps} reps (${w.sets || 1} sets) on ${new Date(w.date).toISOString().split('T')[0]}`;
+  });
+
+  return `Recent Workout Summary:\n${summaries.join('\n')}`;
+}
+
+/**
+ * Helper to find or create user's active conversation
+ */
+async function getOrCreateConversation(userId, firstQuestion = '') {
+  let conversation = await ChatConversation.findOne({ userId }).sort({ updatedAt: -1 });
+
+  if (!conversation) {
+    const title = firstQuestion ? firstQuestion.trim().slice(0, 40) : 'Fitness Chat';
+    conversation = await ChatConversation.create({
+      userId,
+      title,
+    });
+  }
+
+  return conversation;
+}
+
+/**
+ * Helper to retrieve message history within a token budget (~2000 tokens ≈ 8000 chars)
+ */
+async function getBudgetedMessageHistory(conversationId, charBudget = 8000) {
+  const messages = await ChatMessage.find({ conversationId })
+    .sort({ createdAt: -1 })
+    .limit(30)
+    .lean();
+
+  messages.reverse();
+
+  let accumulatedChars = 0;
+  const budgeted = [];
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    const len = (msg.content || '').length;
+    if (accumulatedChars + len > charBudget && budgeted.length > 0) {
+      break;
+    }
+    accumulatedChars += len;
+    budgeted.unshift({
+      role: msg.role,
+      content: msg.content,
+    });
+  }
+
+  return budgeted;
+}
+
+/**
+ * Non-streaming AI advice fallback endpoint
+ */
 const getAdvice = async (req, res) => {
+  const startTime = Date.now();
   const { question } = req.body;
-  const recentWorkouts = await WorkoutLog.find({ userId: req.user._id }).sort({ date: -1 }).limit(10);
-  let recentVolume = 0;
-  recentWorkouts.forEach(w => { recentVolume += w.weight * w.reps * w.sets; });
-  
-  let response = "💪 I'm your AI Coach! Ask me about plateau, form, weight progression, or recovery!";
-  const q = (question || '').toLowerCase();
-  
-  if (q.includes('plateau')) response = "🎯 PLATEAU HELP: Change rep ranges (15-20 reps), add variations, take a deload week (50% weight), increase protein to 2.2g/kg, get 7-8 hours sleep.";
-  else if (q.includes('form')) response = "🧠 FORM TIPS: Control the negative (2-3 sec), focus on mind-muscle connection, keep core braced, use full range of motion.";
-  else if (q.includes('weight')) response = "⚡ WEIGHT PROGRESSION: Add 2.5-5kg when you hit all target reps for 2 sessions. If you miss reps, stay at same weight.";
-  else if (q.includes('recovery')) response = "😴 RECOVERY TIPS: Sleep 7-9 hours, eat protein within 30 min post-workout, drink 3-4L water daily, take 1-2 rest days per week.";
-  else if (q.includes('motivation')) response = "🔥 STAY MOTIVATED: Set small weekly goals, share workouts on Social Feed, celebrate small wins, find a workout buddy!";
-  
-  res.json({ success: true, response, userContext: { recentWorkouts: recentWorkouts.length, recentVolume } });
+  const userId = req.user._id;
+
+  if (!question || !question.trim()) {
+    return res.status(400).json({ success: false, message: 'Question is required' });
+  }
+
+  try {
+    const conversation = await getOrCreateConversation(userId, question);
+
+    // Explicit Save Order: 1. Save User Message immediately
+    await ChatMessage.create({
+      conversationId: conversation._id,
+      role: 'user',
+      content: question.trim(),
+    });
+
+    const userContextStr = await buildSanitizedUserContext(userId);
+    const history = await getBudgetedMessageHistory(conversation._id);
+
+    const promptMessages = [
+      {
+        role: 'system',
+        content: `${systemPrompt}\n\nUser Fitness Context:\n${userContextStr}`,
+      },
+      ...history,
+    ];
+
+    const result = await aiProvider.generate(promptMessages);
+    const responseText = result.text;
+
+    // Explicit Save Order: 2. Save Assistant Message ONLY on completion
+    await ChatMessage.create({
+      conversationId: conversation._id,
+      role: 'assistant',
+      content: responseText,
+    });
+
+    conversation.updatedAt = new Date();
+    await conversation.save();
+
+    const responseTimeMs = Date.now() - startTime;
+    logger.info({
+      userId,
+      timestamp: new Date().toISOString(),
+      model: aiConfig.model,
+      responseTimeMs,
+      completionStatus: 'success',
+      usage: result.usage || undefined,
+    }, 'AI Coach non-stream request');
+
+    res.json({
+      success: true,
+      response: responseText,
+      conversationId: conversation._id,
+    });
+  } catch (error) {
+    const responseTimeMs = Date.now() - startTime;
+    logger.error({
+      userId,
+      timestamp: new Date().toISOString(),
+      model: aiConfig.model,
+      responseTimeMs,
+      completionStatus: 'error',
+      error: error.message,
+    }, 'AI Coach non-stream error');
+
+    res.status(500).json({
+      success: false,
+      message: 'The AI Coach is temporarily unavailable. Please try again in a moment.',
+    });
+  }
 };
 
+/**
+ * NDJSON Streaming AI advice endpoint
+ */
+const getAdviceStream = async (req, res) => {
+  const startTime = Date.now();
+  const { question } = req.body;
+  const userId = req.user._id;
+
+  if (!question || !question.trim()) {
+    return res.status(400).json({ success: false, message: 'Question is required' });
+  }
+
+  // Set streaming headers for NDJSON
+  res.setHeader('Content-Type', 'application/x-ndjson');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  let isAborted = false;
+  const abortController = new AbortController();
+
+  req.on('close', () => {
+    if (!res.writableEnded) {
+      isAborted = true;
+      abortController.abort();
+    }
+  });
+
+  try {
+    const conversation = await getOrCreateConversation(userId, question);
+
+    // 1. Save User Message immediately
+    await ChatMessage.create({
+      conversationId: conversation._id,
+      role: 'user',
+      content: question.trim(),
+    });
+
+    const userContextStr = await buildSanitizedUserContext(userId);
+    const history = await getBudgetedMessageHistory(conversation._id);
+
+    const promptMessages = [
+      {
+        role: 'system',
+        content: `${systemPrompt}\n\nUser Fitness Context:\n${userContextStr}`,
+      },
+      ...history,
+    ];
+
+    const tokenStream = await aiProvider.stream(promptMessages, abortController.signal);
+    let fullResponseText = '';
+
+    for await (const token of tokenStream) {
+      if (isAborted) break;
+      fullResponseText += token;
+      res.write(JSON.stringify({ type: 'token', content: token }) + '\n');
+    }
+
+    if (!isAborted) {
+      // 2. Save Assistant Message ONLY after successful complete stream
+      await ChatMessage.create({
+        conversationId: conversation._id,
+        role: 'assistant',
+        content: fullResponseText,
+      });
+
+      conversation.updatedAt = new Date();
+      await conversation.save();
+
+      res.write(JSON.stringify({ type: 'done' }) + '\n');
+      res.end();
+
+      const responseTimeMs = Date.now() - startTime;
+      logger.info({
+        userId,
+        timestamp: new Date().toISOString(),
+        model: aiConfig.model,
+        responseTimeMs,
+        completionStatus: 'success',
+      }, 'AI Coach stream request success');
+    } else {
+      const responseTimeMs = Date.now() - startTime;
+      logger.info({
+        userId,
+        timestamp: new Date().toISOString(),
+        model: aiConfig.model,
+        responseTimeMs,
+        completionStatus: 'aborted',
+      }, 'AI Coach stream request aborted');
+    }
+  } catch (error) {
+    if (!isAborted) {
+      res.write(JSON.stringify({
+        type: 'error',
+        content: 'The AI Coach is temporarily unavailable. Please try again in a moment.',
+      }) + '\n');
+      res.end();
+    }
+
+    const responseTimeMs = Date.now() - startTime;
+    logger.error({
+      userId,
+      timestamp: new Date().toISOString(),
+      model: aiConfig.model,
+      responseTimeMs,
+      completionStatus: 'error',
+      error: error.message,
+    }, 'AI Coach stream request error');
+  }
+};
+
+/**
+ * Get active chat history for user
+ */
+const getChatHistory = async (req, res) => {
+  try {
+    const conversation = await ChatConversation.findOne({ userId: req.user._id }).sort({ updatedAt: -1 });
+
+    if (!conversation) {
+      return res.json({ success: true, messages: [], conversationId: null });
+    }
+
+    const messages = await ChatMessage.find({ conversationId: conversation._id })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    res.json({
+      success: true,
+      conversationId: conversation._id,
+      title: conversation.title,
+      messages: messages.map(m => ({
+        id: m._id.toString(),
+        text: m.content,
+        isUser: m.role === 'user',
+        timestamp: m.createdAt,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve chat history' });
+  }
+};
+
+/**
+ * Clear chat history for user
+ */
+const clearChatHistory = async (req, res) => {
+  try {
+    const conversation = await ChatConversation.findOne({ userId: req.user._id }).sort({ updatedAt: -1 });
+
+    if (conversation) {
+      await ChatMessage.deleteMany({ conversationId: conversation._id });
+      await ChatConversation.deleteOne({ _id: conversation._id });
+    }
+
+    res.json({ success: true, message: 'Chat history cleared successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to clear chat history' });
+  }
+};
+
+/**
+ * UNTOUCHED EXISTING FUNCTIONS
+ */
 const getFormFeedback = async (req, res) => {
   const { notes, exerciseName } = req.body;
   let feedback = "✅ Good form awareness! Keep focusing on quality reps.";
@@ -93,7 +392,10 @@ const getWeightRecommendation = async (req, res) => {
 
 module.exports = {
   getAdvice,
+  getAdviceStream,
+  getChatHistory,
+  clearChatHistory,
   getFormFeedback,
   detectPlateau,
-  getWeightRecommendation
+  getWeightRecommendation,
 };

@@ -538,8 +538,8 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {workoutPlans.length > 0 ? (
-                workoutPlans.slice(0, 3).map((plan) => (
-                  <div key={plan.id} className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938] neu-inset flex flex-col justify-between space-y-4">
+                workoutPlans.slice(0, 3).map((plan, i) => (
+                  <div key={plan._id || plan.id || i} className="bg-[#0D1117] p-5 rounded-2xl border border-[#202938] neu-inset flex flex-col justify-between space-y-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-[10px] font-extrabold uppercase font-heading px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500]">
@@ -551,7 +551,7 @@ export default function Home() {
                       <p className="text-gray-400 text-xs line-clamp-2">{plan.description}</p>
                     </div>
                     <Link
-                      href={`/workout-plan/${plan.id}`}
+                      href={`/workout-plan/${plan._id || plan.id}`}
                       className="w-full py-2 bg-[#18202C] hover:bg-[#202938] text-white text-center text-xs font-bold rounded-xl border border-[#202938] transition block"
                     >
                       View Routine Details

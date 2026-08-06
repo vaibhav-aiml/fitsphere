@@ -30,7 +30,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Barbell',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/rT7DgCr-3pg',
+      videoUrl: 'https://www.youtube.com/embed/vcBig73ojpE',
       tips: ['Keep feet flat on ground', 'Arch your back slightly', 'Lower bar to mid-chest', 'Keep elbows at 45 degrees'],
       instructions: ['Lie on bench with eyes under bar', 'Grip bar slightly wider than shoulders', 'Unrack and hold above chest', 'Lower to chest controlled', 'Press back up explosively']
     },
@@ -40,7 +40,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Barbell',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/SrqOu55lrYU',
+      videoUrl: 'https://www.youtube.com/embed/8iPEnn-ltC8',
       tips: ['Targets upper chest', 'Keep controlled motion', 'Don\'t bounce the bar'],
       instructions: ['Set bench to 30-45 degrees', 'Grip slightly wider than shoulders', 'Lower to upper chest', 'Press up with power']
     },
@@ -50,7 +50,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Barbell',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/LfyHNUK9kYc',
+      videoUrl: 'https://www.youtube.com/embed/0xRBL7zvq5E',
       tips: ['Targets lower chest', 'Keep feet secured', 'Use full range of motion'],
       instructions: ['Secure feet under pads', 'Grip bar normally', 'Lower to lower chest', 'Press up explosively']
     },
@@ -70,7 +70,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Bodyweight',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/IOxg0RqE2H4',
+      videoUrl: 'https://www.youtube.com/embed/IODxDxX7oi4',
       tips: ['Keep body straight line', 'Don\'t let hips sag', 'Full range of motion'],
       instructions: ['Start in high plank position', 'Hands shoulder-width', 'Lower chest to ground', 'Push back up strongly']
     },
@@ -80,7 +80,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Dumbbells',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/eozdVDA78K0',
+      videoUrl: 'https://www.youtube.com/embed/Z57CtFmRMwg',
       tips: ['Slight bend in elbows', 'Feel the stretch', 'Control the weight'],
       instructions: ['Lie on bench with dumbbells', 'Open arms like hugging a tree', 'Squeeze chest to return']
     },
@@ -90,7 +90,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Chest',
       equipment: 'Dip Bars',
       difficulty: 'Advanced',
-      videoUrl: 'https://www.youtube.com/embed/0326dy_-CzM',
+      videoUrl: 'https://www.youtube.com/embed/2z8JmcrW-As',
       tips: ['Lean forward for chest', 'Keep shoulders down', 'Use full range'],
       instructions: ['Grip dip bars firmly', 'Lower body until stretch', 'Push up powerfully']
     },
@@ -102,7 +102,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Back',
       equipment: 'Barbell',
       difficulty: 'Advanced',
-      videoUrl: 'https://www.youtube.com/embed/op9kVnSso6Q',
+      videoUrl: 'https://www.youtube.com/embed/r4MzxtBKyNE',
       tips: ['Keep back straight', 'Pull slack out of bar', 'Drive through legs'],
       instructions: ['Stand over bar with shins touching', 'Grip bar outside knees', 'Pull bar up legs', 'Lock out hips at top']
     },
@@ -122,7 +122,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Back',
       equipment: 'Cable Machine',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/CAwf7n6Luuc',
+      videoUrl: 'https://www.youtube.com/embed/SALxOUOL5wQ',
       tips: ['Lean back slightly', 'Pull to upper chest', 'Squeeze lats at bottom'],
       instructions: ['Sit at lat pulldown machine', 'Grip bar wide', 'Pull bar to chest', 'Slow return']
     },
@@ -132,7 +132,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Back',
       equipment: 'Barbell',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/vT2GjY_Umpw',
+      videoUrl: 'https://www.youtube.com/embed/FWJR5Ve8bnQ',
       tips: ['Keep back flat', 'Pull bar to stomach', 'Squeeze shoulder blades'],
       instructions: ['Bend at hips with flat back', 'Grip barbell', 'Row to lower chest', 'Lower with control']
     },
@@ -142,7 +142,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Back',
       equipment: 'Cable Machine',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/6TpDfpM93Q4',
+      videoUrl: 'https://www.youtube.com/embed/GZbfZ033fBo',
       tips: ['Keep chest up', 'Pull to stomach', 'Hold contraction'],
       instructions: ['Sit at cable row machine', 'Grip V-bar attachment', 'Pull to torso', 'Squeeze and return']
     },
@@ -162,7 +162,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Back',
       equipment: 'Cable Machine',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/HSoHeSjvqlY',
+      videoUrl: 'https://www.youtube.com/embed/eIq5CB9WXac',
       tips: ['External rotation', 'Pull to face', 'Focus on rear delts'],
       instructions: ['Set rope at high pulley', 'Pull rope to temples', 'Squeeze shoulder blades']
     },
@@ -174,7 +174,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Legs',
       equipment: 'Barbell',
       difficulty: 'Intermediate',
-      videoUrl: 'https://www.youtube.com/embed/bEv6CCg2BC8',
+      videoUrl: 'https://www.youtube.com/embed/ultWZbUMPL8',
       tips: ['Keep chest up', 'Knees track over toes', 'Go as deep as mobile'],
       instructions: ['Position bar on upper back', 'Sit back like sitting in chair', 'Drive through heels']
     },
@@ -184,7 +184,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Legs',
       equipment: 'Barbell',
       difficulty: 'Advanced',
-      videoUrl: 'https://www.youtube.com/embed/8Qc8I8bKcV4',
+      videoUrl: 'https://www.youtube.com/embed/v-mqmOWcRey',
       tips: ['Keep upright torso', 'Elbows high', 'Use clean grip'],
       instructions: ['Bar on front delts', 'Keep elbows up', 'Squat straight down']
     },
@@ -234,7 +234,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Legs',
       equipment: 'Leg Curl Machine',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/1Tq3QdYUuaeU',
+      videoUrl: 'https://www.youtube.com/embed/ELOCsoDSmrg',
       tips: ['Keep hips down', 'Full contraction', 'Control negative'],
       instructions: ['Lie face down on machine', 'Curl weight to glutes', 'Lower slowly']
     },
@@ -328,7 +328,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Arms',
       equipment: 'Barbell',
       difficulty: 'Beginner',
-      videoUrl: 'https://www.youtube.com/embed/KyR5m2T9j2E',
+      videoUrl: 'https://www.youtube.com/embed/kwG2ipFRgfo',
       tips: ['Keep elbows still', 'Full contraction', 'Don\'t swing body'],
       instructions: ['Hold barbell', 'Curl to shoulders', 'Squeeze biceps', 'Slow lowering']
     },
@@ -410,7 +410,7 @@ export default function ExerciseLibrary() {
       muscleGroup: 'Arms',
       equipment: 'Dip Bars',
       difficulty: 'Advanced',
-      videoUrl: 'https://www.youtube.com/embed/0326dy_-CzM',
+      videoUrl: 'https://www.youtube.com/embed/2z8JmcrW-As',
       tips: ['Keep upright body', 'Elbows point back', 'Focus on triceps'],
       instructions: ['Hold dip bars', 'Lower body', 'Keep upright', 'Push up']
     },
@@ -625,17 +625,30 @@ export default function ExerciseLibrary() {
                   </div>
                 </div>
 
-                {/* Video */}
-                <div className="aspect-video bg-black rounded-xl overflow-hidden border border-[#1E2A3A] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={selectedExercise.videoUrl}
-                    title={`${selectedExercise.name} tutorial`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
+                {/* Video Container */}
+                <div className="space-y-2">
+                  <div className="aspect-video bg-black rounded-xl overflow-hidden border border-[#1E2A3A] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={selectedExercise.videoUrl}
+                      title={`${selectedExercise.name} technique tutorial`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="flex justify-between items-center px-1 text-xs text-gray-400 font-sans">
+                    <span>🎬 High-Definition Technique Demonstration</span>
+                    <a
+                      href={selectedExercise.videoUrl.replace('/embed/', '/watch?v=')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#FF5500] hover:underline font-bold flex items-center gap-1"
+                    >
+                      Watch on YouTube ↗
+                    </a>
+                  </div>
                 </div>
 
                 {/* Tips & Instructions in 2-col on lg */}

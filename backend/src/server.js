@@ -2,19 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { globalLimiter } = require('./middleware/rateLimiter');
+const { validateEnvOnStartup } = require('./config/env.config');
 
 dotenv.config();
 
-// Startup Environment Fail-Fast Verification
-const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
-const missingEnvVars = requiredEnvVars.filter(v => !process.env[v]);
-
-if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
-  console.error(`❌ FATAL: Missing mandatory environment variable(s): ${missingEnvVars.join(', ')}`);
-  process.exit(1);
+// Validate Environment Configuration Fail-Fast
+if (process.env.NODE_ENV !== 'test') {
+  validateEnvOnStartup();
 }
 
 const app = express();
@@ -35,7 +33,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Global Rate Limiting
 app.use(globalLimiter);
@@ -63,16 +61,50 @@ app.use('/api', require('./routes/nutrition.routes'));
 app.use('/api', require('./routes/social.routes'));
 app.use('/api', require('./routes/achievement.routes'));
 app.use('/api', require('./routes/aiCoach.routes'));
+app.use('/api', require('./routes/workoutPlanner.routes'));
 
 // Centralized Error Handling Middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+let server = null;
+
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 }
+
+// Graceful Shutdown & Process Signal Handling
+function shutdownGracefully(signal) {
+  console.log(`\n🛑 Signal [${signal}] received. Initiating graceful shutdown...`);
+  if (server) {
+    server.close(async () => {
+      console.log('  └─ HTTP Server closed.');
+      try {
+        await mongoose.connection.close(false);
+        console.log('  └─ MongoDB Connection pool closed.');
+        process.exit(0);
+      } catch (err) {
+        console.error('  └─ Error during DB disconnect:', err.message);
+        process.exit(1);
+      }
+    });
+  } else {
+    process.exit(0);
+  }
+}
+
+process.on('SIGTERM', () => shutdownGracefully('SIGTERM'));
+process.on('SIGINT', () => shutdownGracefully('SIGINT'));
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err.message, err.stack);
+});
 
 module.exports = app;

@@ -21,4 +21,9 @@ router.get('/supplements', authMiddleware, nutritionController.getSupplements);
 router.post('/supplements', authMiddleware, nutritionController.createSupplement);
 router.put('/supplements/:id', authMiddleware, nutritionController.updateSupplement);
 
+// AI Nutrition Engine Endpoints
+router.post('/ai-diet-plan', authMiddleware, nutritionController.generateAiDietPlan);
+router.post('/ai-analyze-meal', authMiddleware, nutritionController.analyzeMealAi);
+router.post('/ai-ask-coach', authMiddleware, nutritionController.askAiNutritionist);
+
 module.exports = router;
