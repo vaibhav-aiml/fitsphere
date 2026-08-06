@@ -1,10 +1,38 @@
-# FitSphere - AI-Powered Fitness Tracking Platform
+# FitSphere - AI-Powered Fitness & Nutrition SaaS Platform
 
-FitSphere is a production-ready, full-stack fitness tracking application built with a **Next.js + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, personalized 10-week powerlifting and bodybuilding workout plans, nutrition tracking, social feeds, and gamified achievements.
+FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, and gamified achievements.
 
 ---
 
-## Architecture Overview
+## 🚀 Recent Architecture & Feature Updates
+
+### 🧠 1. Scalable AI Workout Planner (`/api/v1/ai-planner`)
+- **NDJSON Progress-Streamed Generation** (`POST /generate-stream`): Real-time progress events streamed to the frontend for transparent UX during plan generation.
+- **Groq AI Engine with Exponential Backoff & Jitter**: Integrated `llama-3.3-70b-versatile` with randomized jitter backoff (`1s`, `2s`, `4s`) for transient 429/500/503 error resilience.
+- **Jeff Nippard Powerbuilding System**: Prompts enforce **5 to 6 distinct exercises for every workout day** (Primary Compound, Secondary Compound, Upper/Lower assistance, and Isolations for Delts, Arms, Calves, Core).
+- **Professional PDF Export (`📄 Export PDF`)**: Client-side and server-supported PDF document exporter powered by `jsPDF`.
+- **Data Integrity & Versioning**: Optimistic concurrency control via `expectedVersion` versioning conflict checks (returns HTTP 409 Conflict on stale updates) and single-active-plan ownership rules.
+- **DTO Layer Decoupling**: Strict transformer layer (`toPlanDTO`, `toPlanSummaryDTO`) preventing internal MongoDB `_id` / `__v` leaks.
+
+### 🥗 2. AI Nutrition & Macronutrient Hub (`/nutrition`)
+- **⚡ AI Diet Plan Generator** (`POST /api/nutrition/ai-diet-plan`): Calculates TDEE, BMR, daily calorie/macro targets, and generates a personalized 4-meal daily menu with cooking steps.
+- **🤖 AI Natural Language Meal Scanner** (`POST /api/nutrition/ai-analyze-meal`): Accepts plain-text meal descriptions (e.g. *"200g grilled chicken with 1 cup brown rice and olive oil"*), extracts ingredients, and logs calculated macros directly.
+- **❓ AI Nutritionist & Diet Coach** (`POST /api/nutrition/ai-ask-coach`): Interactive AI modal providing evidence-based sports nutrition and supplement timing advice.
+- **📊 Bento Macro & Hydration Grid**: Real-time progress bars for Calories, Protein, Carbs, Fats, and Water (+250ml / +500ml quick log buttons).
+- **🛒 Smart Grocery List & 💊 Supplement Tracker**: Categorized shopping list check-off and supplement reminder schedule.
+
+### 🏋️ 3. Exercise Library (`/exercises`)
+- **45 Video Demonstrations**: Audited and fixed YouTube embed URLs across Chest, Back, Legs, Shoulders, Arms, and Core.
+- **Direct YouTube Fallback**: Includes a direct **`Watch on YouTube ↗`** link under every video player for browser shielding compatibility.
+
+### 🛡️ 4. Enterprise Reliability & Observability
+- **Startup Environment Validation**: Fail-fast `validateEnvOnStartup()` service verifying mandatory `PORT`, `GROQ_API_KEY`, and `JWT_SECRET` environment variables.
+- **Graceful Process Signal Handling**: Signal handlers (`SIGTERM`, `SIGINT`, `unhandledRejection`, `uncaughtException`) stop ingress via `server.close()`, drain active NDJSON SSE streams, and gracefully close Mongoose DB pools.
+- **Operational Metrics**: Endpoint at `/api/v1/ai-planner/admin/metrics` supporting both JSON and Prometheus format telemetry.
+
+---
+
+## 🏗️ Architecture Overview
 
 FitSphere is structured as a decoupled monorepo:
 
@@ -12,21 +40,24 @@ FitSphere is structured as a decoupled monorepo:
 fitsphere/
 ├── backend/                  # Node.js + Express 5 API Service
 │   ├── src/
-│   │   ├── config/           # Database configuration
-│   │   ├── controllers/      # Business logic handlers
+│   │   ├── config/           # Database, AI, Safety Rules & Env Validation
+│   │   ├── controllers/      # Business logic (Workout Planner, AI Coach, Nutrition)
+│   │   ├── dto/              # Client-safe DTO Transformers
 │   │   ├── middleware/       # Auth, Rate Limiter, Error Handler, Validation
 │   │   ├── models/           # Mongoose schemas & indexes
-│   │   ├── routes/           # Express domain router modules
-│   │   ├── services/         # Achievement logic & Google Auth verification
-│   │   └── server.js         # Express bootstrap server
+│   │   ├── prompts/          # Groq AI System Prompts
+│   │   ├── routes/           # Express domain routers (/api/v1/ai-planner, /api/nutrition)
+│   │   ├── services/         # AI Provider, Progression Engine, Pipeline Services
+│   │   └── server.js         # Express bootstrap & signal handlers
 │   ├── __tests__/            # Jest + Supertest test suites
 │   ├── Dockerfile
 │   └── .env.example
 │
 ├── frontend/                 # Next.js 14 App Router + TailwindCSS
 │   ├── src/
-│   │   ├── app/              # Next.js page components
-│   │   ├── components/       # Reusable UI & Layout components
+│   │   ├── app/              # Next.js page components (/plans, /nutrition, /exercises, /ai-coach)
+│   │   ├── components/       # UI & Layout components
+│   │   ├── hooks/            # Custom Hooks (useRequireAuth)
 │   │   └── lib/              # Shared Axios client (api.ts) & utilities
 │   ├── Dockerfile
 │   └── .env.example
@@ -37,26 +68,16 @@ fitsphere/
 
 ---
 
-## Features
-
-- **Auth & Security**: JWT Authentication with mandatory `JWT_SECRET` fail-fast validation, server-side Google ID Token verification (`google-auth-library`), rate limiting (`express-rate-limit`), security headers (`helmet`), input sanitization (`express-validator`), and CORS controls.
-- **AI Coach**: Interactive AI assistance for plateau detection, form advice, weight recommendations, and recovery guidance.
-- **Workout Planning & Tracking**: Customizable workout logging with compound Mongoose indexes, 1RM & volume analytics, and progressive 10-week bodybuilding & powerlifting programs.
-- **Nutrition Tracker**: Daily calorie & macro logging, water intake tracking, recipe management, and automated grocery lists.
-- **Social Feed**: Sharing workouts, liking posts, and community activity.
-- **Gamification**: XP progression, level-ups, badge achievements, and monthly challenges processed in-process upon logging workouts.
-
----
-
-## Prerequisites
+## ⚙️ Prerequisites
 
 - **Node.js**: v20.x or higher
 - **MongoDB**: v7.0.x (Local instance or MongoDB Atlas)
+- **Groq API Key**: Optional for live AI generation (`GROQ_API_KEY`)
 - **Docker & Docker Compose**: (Optional, for containerized execution)
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
 ### Backend (`backend/.env`)
 
@@ -65,8 +86,9 @@ fitsphere/
 | `PORT` | API Server Port | `5000` |
 | `MONGODB_URI` | MongoDB Connection String *(Mandatory)* | `mongodb://localhost:27017/fitsphere` |
 | `JWT_SECRET` | Secret Key for Signing JWTs *(Mandatory)* | `your-secret-key-change-this` |
+| `GROQ_API_KEY` | Groq API Key for AI Features | `gsk_...` |
+| `GROQ_MODEL` | Primary LLM Model | `llama-3.3-70b-versatile` |
 | `CORS_ORIGIN` | Allowed Client Origins | `http://localhost:3000` |
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | `your-client-id.apps.googleusercontent.com` |
 | `NODE_ENV` | Environment Mode | `development` |
 
 ### Frontend (`frontend/.env.local`)
@@ -76,24 +98,20 @@ fitsphere/
 | `NEXT_PUBLIC_API_URL` | API Endpoint URL | `http://localhost:5000/api` |
 | `NEXTAUTH_URL` | NextAuth Canonical URL | `http://localhost:3000` |
 | `NEXTAUTH_SECRET` | Secret for NextAuth Sessions | `your-nextauth-secret` |
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | `your-google-client-id` |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | `your-google-client-secret` |
 
 ---
 
-## Quick Start (Local Development)
+## 🏁 Quick Start (Local Development)
 
 ### 1. Backend Setup
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env to set MONGODB_URI and JWT_SECRET
+# Set MONGODB_URI, JWT_SECRET, and GROQ_API_KEY
 npm install
 npm run dev
 ```
-
-The backend server will start on `http://localhost:5000`.
 
 ### 2. Frontend Setup
 
@@ -104,66 +122,28 @@ npm install
 npm run dev
 ```
 
-The frontend application will start on `http://localhost:3000`.
+- Frontend UI: `http://localhost:3000`
+- Backend API: `http://localhost:5000`
 
 ---
 
-## Running with Docker Compose
-
-To launch the full stack (MongoDB, Backend, Frontend) in containers:
+## 🐳 Running with Docker Compose
 
 ```bash
 docker-compose up --build
 ```
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:5000`
-- MongoDB: `localhost:27017`
-
 ---
 
-## Testing & CI
-
-### Run Backend Unit & Integration Tests
+## 🧪 Testing & CI
 
 ```bash
 cd backend
 npm test
 ```
 
-### GitHub Actions CI
-
-The `.github/workflows/ci.yml` pipeline automatically triggers on push or pull requests to `main` and runs:
-1. Backend test suite via `jest` and `supertest`.
-2. Frontend TypeScript type checking and Next.js build verification.
-
 ---
 
-## API Documentation
-
-### Auth Routes (`/api`)
-- `POST /api/register` - Register a new user
-- `POST /api/login` - Authenticate and receive JWT
-- `POST /api/auth/google` - Verify Google ID Token and authenticate
-- `GET /api/profile` - Fetch authenticated user profile
-
-### Workout Routes (`/api`)
-- `POST /api/workout-logs` - Log a new workout exercise
-- `GET /api/workout-logs?page=1&limit=20` - Retrieve paginated workout history
-- `GET /api/analytics/volume` - Volume analytics tracking
-- `GET /api/analytics/1rm/:exerciseName` - 1RM progression analytics
-
-### Nutrition Routes (`/api`)
-- `POST /api/meals` - Log meal nutrients
-- `GET /api/meals?date=YYYY-MM-DD` - Get daily meal summaries
-- `POST /api/water` - Track water intake
-
-### Social & Achievements (`/api`)
-- `GET /api/feed?page=1&limit=20` - Retrieve paginated community post feed
-- `GET /api/user-level` - Get user XP and streak status
-
----
-
-## License
+## 📄 License
 
 ISC License
