@@ -13,7 +13,10 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](#-license)
 
-[Repository](https://github.com/vaibhav-aiml/fitsphere) · [Quick Start](#-quick-start-local-development) · [Docker Setup](#-running-with-docker-compose) · [Environment Variables](#-environment-variables)
+🚀 **Live Frontend:** [fitsphere-phi.vercel.app](https://fitsphere-phi.vercel.app)  
+⚡ **Live Backend API:** [fitsphere-api-hdaf.onrender.com](https://fitsphere-api-hdaf.onrender.com)
+
+[Repository](https://github.com/vaibhav-aiml/fitsphere) · [Live App](https://fitsphere-phi.vercel.app) · [Quick Start](#-quick-start-local-development) · [Docker Setup](#-running-with-docker-compose) · [Environment Variables](#-environment-variables)
 
 </div>
 
@@ -21,8 +24,18 @@
 
 FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, and gamified achievements.
 
+## 🌐 Live Deployments
+
+| Component | Platform | URL |
+|---|---|---|
+| 🌐 **Frontend Web App** | Vercel | [https://fitsphere-phi.vercel.app](https://fitsphere-phi.vercel.app) |
+| ⚙️ **Backend API** | Render | [https://fitsphere-api-hdaf.onrender.com](https://fitsphere-api-hdaf.onrender.com) |
+
+---
+
 ## 📚 Table of Contents
 
+- [Live Deployments](#-live-deployments)
 - [Recent Architecture & Feature Updates](#-recent-architecture--feature-updates)
 - [Architecture Overview](#️-architecture-overview)
 - [Prerequisites](#️-prerequisites)
