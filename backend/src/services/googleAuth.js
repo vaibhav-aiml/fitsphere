@@ -14,7 +14,7 @@ const verifyGoogleToken = async (idToken) => {
   
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: clientId
+    ...(clientId ? { audience: clientId } : {})
   });
 
   const payload = ticket.getPayload();

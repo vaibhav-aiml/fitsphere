@@ -3,6 +3,12 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 
+const getApiBaseUrl = () => {
+  const rawUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:5000/api";
+  const cleanUrl = rawUrl.replace(/\/+$/, '');
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -24,7 +30,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+          const apiBase = getApiBaseUrl();
           const response = await axios.post(`${apiBase}/login`, {
             email: credentials?.email,
             password: credentials?.password
@@ -49,7 +55,7 @@ const handler = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+          const apiBase = getApiBaseUrl();
           const response = await axios.post(`${apiBase}/auth/google`, {
             idToken: account.id_token,
             name: user.name,
@@ -64,7 +70,7 @@ const handler = NextAuth({
           }
           return false;
         } catch (error: any) {
-          console.error("Google sign in error:", error.response?.data || error.message);
+          console.error("Google sign in backend error:", error.response?.data || error.message);
           return false;
         }
       }
