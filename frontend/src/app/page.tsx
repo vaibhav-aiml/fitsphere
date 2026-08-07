@@ -156,7 +156,7 @@ export default function Home() {
         />
 
         {/* Main Content Viewport */}
-        <main className={`flex-1 p-4 sm:p-6 md:p-8 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+        <main className={`flex-1 p-4 sm:p-6 md:p-8 pt-16 md:pt-8 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-64 ml-0'}`}>
           
           {/* Header Banner */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-[#11161F] p-6 rounded-3xl border border-[#202938] neu-raised">

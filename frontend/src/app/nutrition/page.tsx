@@ -574,7 +574,7 @@ export default function NutritionTracker() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-3 bg-[#0D1117] p-4 rounded-2xl border border-[#202938] text-center font-mono">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#0D1117] p-4 rounded-2xl border border-[#202938] text-center font-mono">
                     <div>
                       <span className="text-[10px] text-gray-400 uppercase">Calories</span>
                       <p className="text-sm font-bold text-[#FF5500]">{aiPlan.targets.calories} kcal</p>
@@ -641,7 +641,7 @@ export default function NutritionTracker() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase mb-2">Select Meal Category</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {['breakfast', 'lunch', 'dinner', 'snack'].map(type => (
                     <button
                       key={type}
