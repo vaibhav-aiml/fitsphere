@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import LogoMark from '@/components/LogoMark';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -34,8 +35,8 @@ export default function AuthModal({
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-[#FF5500]/15 text-[#FF5500] rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 border border-[#FF5500]/30 shadow-[0_0_20px_rgba(255,85,0,0.2)]">
-            ⚡
+          <div className="w-16 h-16 bg-[#18202C] border border-[#FF5500]/25 rounded-2xl flex items-center justify-center p-3 mx-auto mb-4 neu-raised shadow-[0_0_20px_rgba(255,85,0,0.2)]">
+            <LogoMark size={36} />
           </div>
           <h2 className="text-2xl font-black text-white font-heading mb-2">{title}</h2>
           <p className="text-gray-400 text-sm">{description}</p>

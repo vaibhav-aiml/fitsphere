@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import LogoMark from '@/components/LogoMark';
 
 interface NavItem {
   name: string;
@@ -55,8 +56,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
             </svg>
           </button>
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF5500] to-[#CC4400] flex items-center justify-center text-white text-xs font-black shadow-[0_0_12px_rgba(255,85,0,0.3)]">
-              ⚡
+            <div className="w-7 h-7 rounded-lg bg-[#18202C] border border-[#FF5500]/25 flex items-center justify-center p-1 shadow-[0_0_12px_rgba(255,85,0,0.2)]">
+              <LogoMark size={20} />
             </div>
             <span className="text-lg font-black font-heading text-white tracking-tight">
               FIT<span className="text-[#FF5500]">SPHERE</span>
@@ -89,8 +90,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
           {/* Brand Header */}
           <div className="p-3.5 border-b border-[#202938] flex justify-between items-center bg-[#090C10] shrink-0">
             <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 group overflow-hidden">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF5500] to-[#CC4400] flex items-center justify-center text-white text-base font-black shadow-[0_0_15px_rgba(255,85,0,0.3)] shrink-0">
-                ⚡
+              <div className="w-8 h-8 rounded-xl bg-[#18202C] border border-[#FF5500]/25 flex items-center justify-center p-1.5 shadow-[0_0_15px_rgba(255,85,0,0.25)] shrink-0">
+                <LogoMark size={22} />
               </div>
               <span className={`text-xl font-black font-heading text-white tracking-tight group-hover:text-[#FF5500] transition truncate ${sidebarCollapsed ? 'md:hidden' : ''}`}>
                 FIT<span className="text-[#FF5500]">SPHERE</span>

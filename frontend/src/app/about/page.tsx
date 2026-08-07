@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import LogoMark from '@/components/LogoMark';
 
 export default function AboutPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
@@ -160,7 +161,10 @@ export default function AboutPage() {
         {/* Navigation */}
         <nav className="relative z-20 border-b border-borderMuted/50 bg-obsidian/80 backdrop-blur-md">
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blaze rounded">
+            <Link href="/" className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blaze rounded">
+              <div className="w-7 h-7 rounded-lg bg-elevated border border-blaze/25 flex items-center justify-center p-1 shadow-[0_0_12px_rgba(255,85,0,0.2)]">
+                <LogoMark size={18} />
+              </div>
               <h1 className="font-heading text-xl font-semibold text-white tracking-tight">
                 Fit<span className="text-blaze">Sphere</span>
               </h1>
