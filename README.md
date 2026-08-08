@@ -13,16 +13,16 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](#-license)
 
-🚀 **Live Frontend:** [fitsphere-phi.vercel.app](https://fitsphere-phi.vercel.app)  
+🚀 **Live Frontend:** [fitsphere-phi.vercel.app](https://fitsphere-phi.vercel.app)
 ⚡ **Live Backend API:** [fitsphere-api-hdaf.onrender.com](https://fitsphere-api-hdaf.onrender.com)
 
-[Repository](https://github.com/vaibhav-aiml/fitsphere) · [Live App](https://fitsphere-phi.vercel.app) · [Quick Start](#-quick-start-local-development) · [Docker Setup](#-running-with-docker-compose) · [Environment Variables](#-environment-variables)
+[Repository](https://github.com/vaibhav-aiml/fitsphere) · [Live App](https://fitsphere-phi.vercel.app) · [About & Pricing](https://fitsphere-phi.vercel.app/about) · [Quick Start](#-quick-start-local-development) · [Docker Setup](#-running-with-docker-compose) · [Environment Variables](#-environment-variables)
 
 </div>
 
 ---
 
-FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, real-time step and multi-sport activity tracking, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, and gamified achievements.
+FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, real-time step and multi-sport activity tracking, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, gamified achievements, and Google OAuth authentication.
 
 ## 🌐 Live Deployments
 
@@ -38,6 +38,7 @@ FitSphere is a production-inspired, full-stack AI fitness platform built with a 
 - [Live Deployments](#-live-deployments)
 - [Recent Architecture & Feature Updates](#-recent-architecture--feature-updates)
 - [Architecture Overview](#️-architecture-overview)
+- [Route Map](#-route-map)
 - [Prerequisites](#️-prerequisites)
 - [Environment Variables](#-environment-variables)
 - [Quick Start](#-quick-start-local-development)
@@ -54,12 +55,28 @@ FitSphere is a production-inspired, full-stack AI fitness platform built with a 
 
 | Capability | Detail |
 |---|---|
-| **Multi-Sport Profiles** | Live session tracking across 9 activity profiles (Running, Outdoor Walking, Cycling, Trekking, Treadmill, Badminton, Basketball, Gym/HIIT, Jump Rope) |
-| **Dynamic MET Calorie Matrix** | Piecewise linear MET scaling based on speed (Outdoor Running, Walking, Cycling), cadence (Treadmill, Jump Rope, Badminton, Basketball), or motion/rep bursts (Gym/HIIT) |
-| **HTML5 Sensors & GPS Filtering** | DeviceMotionEvent peak-detection step counter + Geolocation observer with 20m accuracy filter, 3m noise floor filter, and activity speed gates (30 km/h running, 65 km/h cycling) |
-| **Web Platform & iOS Shielding** | Universal Web Audio API tone chimes (`AudioContext`), Screen Wake Lock API (`navigator.wakeLock`), and Page Visibility API (`visibilitychange`) tab auto-pause |
-| **Crash Recovery & Autosave** | Periodic 15-second `localStorage` snapshot recovery offering instant session restoration on browser reloads or tab crashes |
-| **Telemetry & Privacy** | 10-second telemetry snapshot buffering, post-workout step/distance manual correction modal (`isManuallyEdited`), and location-privacy protected social feed sharing |
+| **Multi-Sport Profiles** | Live session tracking across 9 activity profiles (Running, Outdoor Walking, Cycling, Trekking, Indoor Treadmill, Badminton, Basketball, Gym/HIIT, Jump Rope) |
+| **Dynamic MET Calorie Matrix** | Piecewise-linear MET scaling driven by GPS speed (Running, Outdoor Walking, Cycling), cadence (Treadmill, Jump Rope, Badminton, Basketball), or motion/rep bursts (Gym/HIIT) |
+| **HTML5 Sensors & GPS Filtering** | `DeviceMotionEvent` peak-detection step counter + `Geolocation.watchPosition` observer with a 20m accuracy filter, 3m noise-floor filter, and activity-specific max-speed gates (30 km/h running/walking/trekking, 65 km/h cycling) |
+| **Web Platform & iOS Shielding** | Universal Web Audio API milestone chimes (`AudioContext`, with `webkitAudioContext` fallback), Screen Wake Lock (`navigator.wakeLock`) re-acquired on refocus, and Page Visibility (`visibilitychange`) auto-pause requiring explicit user resume |
+| **Crash Recovery & Autosave** | 15-second `localStorage` session snapshots with a "Resume Session / Discard" banner on reload |
+| **Telemetry & Privacy** | 10-second telemetry snapshot buffering, post-workout step/distance manual correction (`isManuallyEdited`), and social-feed sharing that excludes raw GPS coordinates |
+
+### 🎨 Rebranded About & Pricing Experience
+`/about`
+
+| Capability | Detail |
+|---|---|
+| **Custom Brand Mark** | Hand-built inline SVG `LogoMark` (a barbell bent into a partial ring) replacing the previous emoji badge across the sidebar, mobile nav, auth modal, loading states, and favicon |
+| **Creator & Tech Stack Section** | Creator card with GitHub link, plus a badge grid of the live tech stack (Next.js 14, TypeScript, Tailwind CSS, Node.js, Express, MongoDB, Groq AI) |
+| **INR Pricing Tiers** | Starter ₹0, Pro ₹499/mo ("Most Popular"), Elite ₹999/mo, each with their real feature lists |
+| **Design System Consistency** | Built entirely on the existing `obsidian` / `charcoal` / `blaze` (orange) neumorphic theme — no new color tokens introduced |
+
+### 📱 Full Mobile Responsiveness
+| Capability | Detail |
+|---|---|
+| **Off-Canvas Sidebar Drawer** | The dashboard's fixed sidebar now converts to a slide-in drawer with backdrop below the `md:` breakpoint, leaving desktop behavior untouched |
+| **Fixed Collapse/Expand & Close Bugs** | Resolved the desktop sidebar toggle losing its expand control and the mobile drawer's close button not dismissing the overlay |
 
 ### 🧠 Scalable AI Workout Planner
 `/api/v1/ai-planner`
@@ -89,7 +106,10 @@ FitSphere is a production-inspired, full-stack AI fitness platform built with a 
 
 - **45 Video Demonstrations** — audited and fixed YouTube embed URLs across Chest, Back, Legs, Shoulders, Arms, and Core
 - **Direct YouTube Fallback** — a **`Watch on YouTube ↗`** link under every video player for browser shielding compatibility
-- **Live Tracker Integration** — quick launch banners and progress stats integrating live sessions with strength training logs
+- **Live Tracker Integration** — quick-launch banners and progress stats linking strength logs with live tracking sessions
+
+### 🔐 Authentication
+- **Google OAuth** via NextAuth on the frontend and `google-auth-library` token verification on the backend, alongside existing email/password JWT auth
 
 ### 🛡️ Enterprise Reliability & Observability
 
@@ -107,31 +127,59 @@ FitSphere is structured as a decoupled monorepo:
 fitsphere/
 ├── backend/                  # Node.js + Express 5 API Service
 │   ├── src/
-│   │   ├── config/           # Database, AI, Safety Rules & Env Validation
+│   │   ├── config/           # Database, AI (Groq), Env Validation
 │   │   ├── controllers/      # Business logic (Active Session, Workout Planner, AI Coach, Nutrition)
-│   │   ├── dto/              # Client-safe DTO Transformers
+│   │   ├── dto/               # Client-safe DTO Transformers
 │   │   ├── middleware/       # Auth, Rate Limiter, Error Handler, Validation
 │   │   ├── models/           # Mongoose schemas (ActiveWorkoutSession, WorkoutLog, User, etc.)
-│   │   ├── prompts/          # Groq AI System Prompts
+│   │   ├── services/         # AI Provider (Groq), Google Auth, Progression Engine
 │   │   ├── routes/           # Express domain routers (/api/active-sessions, /api/v1/ai-planner, /api/nutrition)
-│   │   ├── services/         # AI Provider, Progression Engine, Pipeline Services
 │   │   └── server.js         # Express bootstrap & signal handlers
-│   ├── __tests__/            # Jest + Supertest test suites (activeSession, workout, auth)
+│   ├── __tests__/            # Jest + Supertest suites (activeSession, workout, auth)
 │   ├── Dockerfile
 │   └── .env.example
 │
 ├── frontend/                 # Next.js 14 App Router + TailwindCSS
 │   ├── src/
-│   │   ├── app/               # Next.js page components (/workout/live, /plans, /nutrition, /exercises, /progress)
-│   │   ├── components/        # UI & Layout components (AuthModal, IronDial, etc.)
-│   │   ├── hooks/              # Custom Hooks (useStepTracker, useRequireAuth)
-│   │   └── lib/                # Shared Axios client (api.ts), metCalculations.ts & utilities
+│   │   ├── app/               # Page routes — see Route Map below
+│   │   │   └── api/auth/[...nextauth]/  # NextAuth Google OAuth handler
+│   │   ├── components/
+│   │   │   ├── dashboard/    # SidebarNav (responsive drawer)
+│   │   │   ├── landing/      # LandingHero, LandingNavbar
+│   │   │   └── LogoMark.tsx  # Custom SVG brand mark
+│   │   ├── hooks/             # useStepTracker, useRequireAuth
+│   │   └── lib/                # Axios client (api.ts), metCalculations.ts
+│   ├── public/                # manifest.json (PWA), static assets
 │   ├── Dockerfile
 │   └── .env.example
 │
 ├── docker-compose.yml        # Multi-container orchestration (Backend, Frontend, MongoDB)
-└── .github/workflows/ci.yml  # GitHub Actions CI pipeline
+└── .github/workflows/ci.yml  # GitHub Actions CI pipeline (backend lint & test)
 ```
+
+---
+
+## 🗺️ Route Map
+
+| Route | Description |
+|---|---|
+| `/` | Authenticated dashboard — training portals, quick-launch cards |
+| `/about` | Public marketing page — features, creator/tech stack, INR pricing |
+| `/workout` | Strength workout logger |
+| `/workout/live` | Real-time step & multi-sport activity tracker |
+| `/workout-plan/[id]` | Individual AI-generated workout plan view |
+| `/plans` | AI workout plan generator & management |
+| `/exercises` | 45-video exercise library |
+| `/nutrition` | AI nutrition hub — diet plans, meal scanner, coach |
+| `/progress` | Strength + live session analytics and history |
+| `/analytics` | Charted performance analytics (Recharts) |
+| `/achievements` | Gamified milestones |
+| `/ai-coach` | AI coaching chat interface |
+| `/social` | Social workout feed |
+| `/music` | Workout music integration |
+| `/calendar` | Training calendar |
+| `/export` | PDF export tools |
+| `/auth/login`, `/auth/signup` | Email/password + Google OAuth entry points |
 
 ---
 
@@ -142,6 +190,7 @@ fitsphere/
 | **Node.js** | v20.x or higher |
 | **MongoDB** | v7.0.x (local instance or MongoDB Atlas) |
 | **Groq API Key** | Optional — required only for live AI generation (`GROQ_API_KEY`) |
+| **Google OAuth Credentials** | Optional — required only for "Sign in with Google" |
 | **Docker & Docker Compose** | Optional — for containerized execution |
 
 ---
@@ -150,23 +199,30 @@ fitsphere/
 
 ### Backend — `backend/.env`
 
-| Variable | Description | Default / Example |
+| Variable | Description | Required |
 | :--- | :--- | :--- |
-| `PORT` | API Server Port | `5000` |
-| `MONGODB_URI` | MongoDB Connection String *(Mandatory)* | `mongodb://localhost:27017/fitsphere` |
-| `JWT_SECRET` | Secret Key for Signing JWTs *(Mandatory)* | `your-secret-key-change-this` |
-| `GROQ_API_KEY` | Groq API Key for AI Features | `gsk_...` |
-| `GROQ_MODEL` | Primary LLM Model | `llama-3.3-70b-versatile` |
-| `CORS_ORIGIN` | Allowed Client Origins | `http://localhost:3000` |
-| `NODE_ENV` | Environment Mode | `development` |
+| `PORT` | API Server Port | Optional (default `5000`) |
+| `MONGODB_URI` | MongoDB Connection String | **Mandatory** |
+| `JWT_SECRET` | Secret Key for Signing JWTs | **Mandatory** |
+| `GROQ_API_KEY` | Groq API Key for AI Features (planner, nutrition, coach) | Optional — AI endpoints fail without it |
+| `GROQ_MODEL` | Primary LLM Model | Optional (defaults to `llama-3.3-70b-versatile`) |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID, for verifying Google sign-in tokens | Optional — needed for Google login |
+| `CORS_ORIGIN` | Allowed Client Origins | Optional (default `http://localhost:3000`) |
+| `NODE_ENV` | Environment Mode | Optional (default `development`) |
+
+> Note: the checked-in `backend/.env.example` currently lists `GOOGLE_CLIENT_ID` but not `GROQ_API_KEY`/`GROQ_MODEL`, even though both are read by `src/config/ai.js` and validated by `validateEnvOnStartup()`. Worth adding them to the example file to avoid new contributors missing them.
 
 ### Frontend — `frontend/.env.local`
 
-| Variable | Description | Default / Example |
+| Variable | Description | Required |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_API_URL` | API Endpoint URL | `http://localhost:5000/api` |
-| `NEXTAUTH_URL` | NextAuth Canonical URL | `http://localhost:3000` |
-| `NEXTAUTH_SECRET` | Secret for NextAuth Sessions | `your-nextauth-secret` |
+| `NEXT_PUBLIC_API_URL` | API Endpoint URL | **Mandatory** |
+| `NEXTAUTH_URL` | NextAuth Canonical URL | **Mandatory** |
+| `NEXTAUTH_SECRET` | Secret for NextAuth Sessions | **Mandatory** |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | Optional — needed for Google login |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | Optional — needed for Google login |
+
+`JWT_SECRET` and `NEXTAUTH_SECRET` are values you generate yourself (e.g. `openssl rand -base64 32`) — not third-party keys. `GROQ_API_KEY` and the `GOOGLE_CLIENT_*` pairs are the only credentials that require creating an external account, and both are optional unless you need those specific features.
 
 ---
 
@@ -177,7 +233,7 @@ fitsphere/
 ```bash
 cd backend
 cp .env.example .env
-# Set MONGODB_URI, JWT_SECRET, and GROQ_API_KEY
+# Set MONGODB_URI, JWT_SECRET, and (optionally) GROQ_API_KEY / GOOGLE_CLIENT_ID
 npm install
 npm run dev
 ```
@@ -215,7 +271,7 @@ cd backend
 npm test
 ```
 
-Test suites run on **Jest + Supertest**, wired into a **GitHub Actions CI pipeline**.
+Test suites (`auth.test.js`, `workout.test.js`, `activeSession.test.js`) run on **Jest + Supertest**, wired into the **GitHub Actions CI pipeline** (`.github/workflows/ci.yml`) on pushes and PRs to `main`, `master`, and `develop`.
 
 ---
 
