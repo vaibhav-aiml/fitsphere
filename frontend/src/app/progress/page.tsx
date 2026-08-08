@@ -13,6 +13,8 @@ export default function ProgressPage() {
   const [stats, setStats] = useState<any>(null);
   const [workoutLogs, setWorkoutLogs] = useState<any[]>([]);
   const [bodyWeights, setBodyWeights] = useState<any[]>([]);
+  const [activeSessions, setActiveSessions] = useState<any[]>([]);
+  const [activeStats, setActiveStats] = useState<any>(null);
   const [showLogForm, setShowLogForm] = useState(false);
   const [logForm, setLogForm] = useState({
     exerciseName: '',
@@ -34,15 +36,19 @@ export default function ProgressPage() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, logsRes, weightRes] = await Promise.all([
+      const [statsRes, logsRes, weightRes, activeSessionsRes, activeStatsRes] = await Promise.all([
         api.get('/stats'),
         api.get('/workout-logs?limit=20'),
-        api.get('/body-weight')
+        api.get('/body-weight'),
+        api.get('/active-sessions?limit=10').catch(() => ({ data: { sessions: [] } })),
+        api.get('/active-sessions/stats').catch(() => ({ data: { stats: null } }))
       ]);
       
       setStats(statsRes.data.stats);
       setWorkoutLogs(logsRes.data.logs || []);
       setBodyWeights(weightRes.data.weights || []);
+      setActiveSessions(activeSessionsRes.data.sessions || []);
+      setActiveStats(activeStatsRes.data.stats || null);
     } catch (error) {
       console.error('Failed to load progress data:', error);
     }
@@ -261,6 +267,86 @@ export default function ProgressPage() {
                   </div>
                   <span className="text-gray-500 text-xs font-mono bg-[#0D1117] px-3 py-1 rounded-lg border border-[#202938]">
                     {new Date(log.date).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Live Step & Multi-Sport Activity Tracking History */}
+        <div className="bg-[#11161F] p-6 sm:p-8 rounded-3xl border border-[#202938] neu-raised">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
+            <div>
+              <h2 className="text-2xl font-black text-white font-heading flex items-center gap-2">
+                <span>🏃‍♂️</span> LIVE STEP & SPORT TRACKING HISTORY
+              </h2>
+              <p className="text-gray-400 text-xs mt-0.5">Real-time step counter, MET calories, pace, and active sport sessions</p>
+            </div>
+            <Link
+              href="/workout/live"
+              className="px-4 py-2 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-bold font-heading uppercase rounded-xl transition"
+            >
+              + Start Live Session
+            </Link>
+          </div>
+
+          {activeStats && activeStats.totalSessions > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div className="bg-[#18202C] p-3.5 rounded-2xl border border-[#202938]">
+                <span className="text-gray-400 text-[10px] uppercase font-bold">Total Live Steps</span>
+                <p className="text-xl font-black text-white font-heading mt-1">{activeStats.totalSteps?.toLocaleString() || 0}</p>
+              </div>
+              <div className="bg-[#18202C] p-3.5 rounded-2xl border border-[#202938]">
+                <span className="text-[#FF5500] text-[10px] uppercase font-bold">Total Live Calories</span>
+                <p className="text-xl font-black text-[#FF5500] font-heading mt-1">{activeStats.totalCalories || 0} kcal</p>
+              </div>
+              <div className="bg-[#18202C] p-3.5 rounded-2xl border border-[#202938]">
+                <span className="text-cyan-400 text-[10px] uppercase font-bold">Total Outdoor Dist</span>
+                <p className="text-xl font-black text-white font-heading mt-1">{activeStats.totalDistanceKm || 0} km</p>
+              </div>
+              <div className="bg-[#18202C] p-3.5 rounded-2xl border border-[#202938]">
+                <span className="text-emerald-400 text-[10px] uppercase font-bold">Live Sessions</span>
+                <p className="text-xl font-black text-white font-heading mt-1">{activeStats.totalSessions || 0}</p>
+              </div>
+            </div>
+          )}
+
+          {activeSessions.length === 0 ? (
+            <div className="bg-[#0D1117] p-8 rounded-2xl text-center border border-[#202938] neu-inset">
+              <p className="text-gray-400 font-semibold">No live tracking sessions recorded yet.</p>
+              <p className="text-gray-500 text-xs mt-1">Launch the Real-Time Step Tracker during your next run, walk, or indoor game!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activeSessions.map((session: any) => (
+                <div key={session._id} className="bg-[#18202C] p-4 rounded-2xl border border-[#202938] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-black text-base font-heading capitalize">
+                        {session.activityType?.replace('_', ' ')}
+                      </span>
+                      {session.isManuallyEdited && (
+                        <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-bold">
+                          Edited
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300 mt-1">
+                      <span>👟 <strong className="text-white">{session.stepsCount?.toLocaleString()}</strong> steps</span>
+                      <span>🔥 <strong className="text-[#FF5500]">{session.caloriesBurned}</strong> kcal</span>
+                      {session.distanceKm && (
+                        <span>📍 <strong className="text-white">{session.distanceKm}</strong> km</span>
+                      )}
+                      {session.avgPaceMinPerKm && (
+                        <span>⚡ <strong className="text-cyan-400">{session.avgPaceMinPerKm}</strong> min/km</span>
+                      )}
+                      <span>⏱️ {Math.floor(session.durationSeconds / 60)}m {session.durationSeconds % 60}s</span>
+                    </div>
+                    {session.notes && <p className="text-gray-400 text-xs mt-1 italic">📝 {session.notes}</p>}
+                  </div>
+                  <span className="text-gray-500 text-xs font-mono bg-[#0D1117] px-3 py-1 rounded-lg border border-[#202938]">
+                    {new Date(session.startTime || session.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               ))}

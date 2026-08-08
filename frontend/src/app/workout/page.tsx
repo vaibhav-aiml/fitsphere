@@ -151,6 +151,27 @@ export default function WorkoutLogger() {
           </div>
         </div>
 
+        {/* Live Step & Multi-Sport Activity Tracker Banner */}
+        <div className="bg-gradient-to-r from-[#18202C] via-[#11161F] to-[#18202C] p-6 rounded-3xl border border-[#FF5500]/30 neu-raised flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="space-y-1 text-center sm:text-left">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              New Feature
+            </span>
+            <h3 className="text-xl font-black text-white font-heading mt-2">
+              🏃‍♂️ Real-Time Step & Outdoor Tracker
+            </h3>
+            <p className="text-gray-400 text-xs max-w-xl">
+              Track live steps, dynamic MET calories, distance, and cadence for Running, Trekking, Badminton, Treadmill, and Indoor Sports.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/workout/live')}
+            className="px-6 py-3 bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-extrabold uppercase font-heading rounded-xl shadow-lg shadow-[#FF5500]/25 transition transform hover:scale-105 whitespace-nowrap"
+          >
+            Launch Live Tracker →
+          </button>
+        </div>
+
         {/* Current Workout Summary */}
         {currentWorkout.length > 0 && (
           <div className="bg-[#11161F] p-6 rounded-3xl border border-[#FF5500]/40 neu-raised space-y-4">

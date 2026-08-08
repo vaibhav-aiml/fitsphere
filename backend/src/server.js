@@ -62,6 +62,7 @@ app.use('/api', require('./routes/social.routes'));
 app.use('/api', require('./routes/achievement.routes'));
 app.use('/api', require('./routes/aiCoach.routes'));
 app.use('/api', require('./routes/workoutPlanner.routes'));
+app.use('/api', require('./routes/activeSession.routes'));
 
 // Centralized Error Handling Middleware
 app.use(errorHandler);

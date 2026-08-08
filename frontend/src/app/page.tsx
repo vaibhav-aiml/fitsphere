@@ -33,6 +33,7 @@ export default function Home() {
   const navItems = [
     { name: 'Dashboard', icon: '⚡', href: '/', color: 'blaze' },
     { name: 'Workout Logger', icon: '🏋️‍♂️', href: '/workout', color: 'emerald' },
+    { name: 'Live Step Tracker', icon: '🏃‍♂️', href: '/workout/live', color: 'orange' },
     { name: 'Workout Plans', icon: '📋', href: '/plans', color: 'purple' },
     { name: 'Exercises', icon: '💪', href: '/exercises', color: 'cyan' },
     { name: 'Nutrition', icon: '🥗', href: '/nutrition', color: 'emerald' },
@@ -392,6 +393,13 @@ export default function Home() {
                   >
                     <span>🏋️ Start Workout Logger</span>
                     <span className="text-[#FF5500]">→</span>
+                  </button>
+                  <button
+                    onClick={() => handleGatedFeatureClick('/workout/live', 'Live Step Tracker')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0D1117] hover:bg-[#18202C] text-xs font-bold text-emerald-400 border border-emerald-500/20 transition"
+                  >
+                    <span>🏃‍♂️ Real-Time Step Tracker</span>
+                    <span className="text-emerald-400">→</span>
                   </button>
                   <Link
                     href="/plans"
