@@ -4,7 +4,7 @@
 
 ### AI-Powered Fitness & Nutrition SaaS Platform
 
-*Personalized coaching. Smart nutrition. Real workouts. Built to scale.*
+*Personalized coaching. Smart nutrition. Real workouts. Live step & sport tracking. Built to scale.*
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Frontend-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -22,7 +22,7 @@
 
 ---
 
-FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, and gamified achievements.
+FitSphere is a production-inspired, full-stack AI fitness platform built with a **Next.js 14 + TypeScript** frontend and an **Express 5 + MongoDB (Mongoose)** backend. It features AI-powered coaching, real-time step and multi-sport activity tracking, personalized Jeff Nippard Powerbuilding workout plans, an AI Nutrition Hub, exercise video demonstrations, social feeds, and gamified achievements.
 
 ## 🌐 Live Deployments
 
@@ -49,6 +49,18 @@ FitSphere is a production-inspired, full-stack AI fitness platform built with a 
 
 ## 🚀 Recent Architecture & Feature Updates
 
+### 🏃‍♂️ Real-Time Step Tracker & Live Multi-Sport Engine
+`/workout/live` & `/api/active-sessions`
+
+| Capability | Detail |
+|---|---|
+| **Multi-Sport Profiles** | Live session tracking across 9 activity profiles (Running, Outdoor Walking, Cycling, Trekking, Treadmill, Badminton, Basketball, Gym/HIIT, Jump Rope) |
+| **Dynamic MET Calorie Matrix** | Piecewise linear MET scaling based on speed (Outdoor Running, Walking, Cycling), cadence (Treadmill, Jump Rope, Badminton, Basketball), or motion/rep bursts (Gym/HIIT) |
+| **HTML5 Sensors & GPS Filtering** | DeviceMotionEvent peak-detection step counter + Geolocation observer with 20m accuracy filter, 3m noise floor filter, and activity speed gates (30 km/h running, 65 km/h cycling) |
+| **Web Platform & iOS Shielding** | Universal Web Audio API tone chimes (`AudioContext`), Screen Wake Lock API (`navigator.wakeLock`), and Page Visibility API (`visibilitychange`) tab auto-pause |
+| **Crash Recovery & Autosave** | Periodic 15-second `localStorage` snapshot recovery offering instant session restoration on browser reloads or tab crashes |
+| **Telemetry & Privacy** | 10-second telemetry snapshot buffering, post-workout step/distance manual correction modal (`isManuallyEdited`), and location-privacy protected social feed sharing |
+
 ### 🧠 Scalable AI Workout Planner
 `/api/v1/ai-planner`
 
@@ -72,11 +84,12 @@ FitSphere is a production-inspired, full-stack AI fitness platform built with a 
 | **📊 Bento Macro & Hydration Grid** | Real-time progress bars for Calories, Protein, Carbs, Fats, and Water (+250ml / +500ml quick log buttons) |
 | **🛒 Smart Grocery List & 💊 Supplement Tracker** | Categorized shopping list check-off and supplement reminder schedule |
 
-### 🏋️ Exercise Library
-`/exercises`
+### 🏋️ Exercise Library & Workout Logger
+`/exercises` & `/workout`
 
 - **45 Video Demonstrations** — audited and fixed YouTube embed URLs across Chest, Back, Legs, Shoulders, Arms, and Core
 - **Direct YouTube Fallback** — a **`Watch on YouTube ↗`** link under every video player for browser shielding compatibility
+- **Live Tracker Integration** — quick launch banners and progress stats integrating live sessions with strength training logs
 
 ### 🛡️ Enterprise Reliability & Observability
 
@@ -95,24 +108,24 @@ fitsphere/
 ├── backend/                  # Node.js + Express 5 API Service
 │   ├── src/
 │   │   ├── config/           # Database, AI, Safety Rules & Env Validation
-│   │   ├── controllers/      # Business logic (Workout Planner, AI Coach, Nutrition)
+│   │   ├── controllers/      # Business logic (Active Session, Workout Planner, AI Coach, Nutrition)
 │   │   ├── dto/              # Client-safe DTO Transformers
 │   │   ├── middleware/       # Auth, Rate Limiter, Error Handler, Validation
-│   │   ├── models/           # Mongoose schemas & indexes
+│   │   ├── models/           # Mongoose schemas (ActiveWorkoutSession, WorkoutLog, User, etc.)
 │   │   ├── prompts/          # Groq AI System Prompts
-│   │   ├── routes/           # Express domain routers (/api/v1/ai-planner, /api/nutrition)
+│   │   ├── routes/           # Express domain routers (/api/active-sessions, /api/v1/ai-planner, /api/nutrition)
 │   │   ├── services/         # AI Provider, Progression Engine, Pipeline Services
 │   │   └── server.js         # Express bootstrap & signal handlers
-│   ├── __tests__/            # Jest + Supertest test suites
+│   ├── __tests__/            # Jest + Supertest test suites (activeSession, workout, auth)
 │   ├── Dockerfile
 │   └── .env.example
 │
 ├── frontend/                 # Next.js 14 App Router + TailwindCSS
 │   ├── src/
-│   │   ├── app/               # Next.js page components (/plans, /nutrition, /exercises, /ai-coach)
-│   │   ├── components/        # UI & Layout components
-│   │   ├── hooks/              # Custom Hooks (useRequireAuth)
-│   │   └── lib/                # Shared Axios client (api.ts) & utilities
+│   │   ├── app/               # Next.js page components (/workout/live, /plans, /nutrition, /exercises, /progress)
+│   │   ├── components/        # UI & Layout components (AuthModal, IronDial, etc.)
+│   │   ├── hooks/              # Custom Hooks (useStepTracker, useRequireAuth)
+│   │   └── lib/                # Shared Axios client (api.ts), metCalculations.ts & utilities
 │   ├── Dockerfile
 │   └── .env.example
 │
